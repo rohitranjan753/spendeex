@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "606315075024",
+    "project_id": "spendeex-c0b1e",
+    "storage_bucket": "spendeex-c0b1e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:606315075024:android:9884efbc177a8ccf1f95d5",
+        "android_client_info": {
+          "package_name": "com.example.spendeex"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "606315075024-5t80tgv19h58bkb0dnvaq3t8o7satopi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.spendeex",
+            "certificate_hash": "948770d0e008be8d472c4bb316796ffd8a931d0e"
+          }
+        },
+        {
+          "client_id": "606315075024-pet8rchme39t4m7pj8q5tjtt8jrh5odv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpiT-_1XNvnYkkPB8-aEikAOAcbKRsO0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "606315075024-pet8rchme39t4m7pj8q5tjtt8jrh5odv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
