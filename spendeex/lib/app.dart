@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-         ChangeNotifierProvider(create: (_) => BottomNavProvider()),
+        ChangeNotifierProvider(create: (_) => BottomNavProvider()),
       ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
@@ -26,13 +26,16 @@ class MyApp extends StatelessWidget {
             onGenerateRoute: AppRouter.generateRoute,
             initialRoute: '/',
             routes: {
-          '/': (context) => Consumer<AuthProvider>(
-                builder: (context, authProvider, _) {
-                  return authProvider.isAuthenticated ? MainScreen() : LoginScreen();
-                },
-              ),
-          '/login': (context) => LoginScreen(),
-        },
+              '/':
+                  (context) => Consumer<AuthProvider>(
+                    builder: (context, authProvider, _) {
+                      return authProvider.isAuthenticated
+                          ? MainScreen()
+                          : LoginScreen();
+                    },
+                  ),
+              '/login': (context) => LoginScreen(),
+            },
           );
         },
       ),

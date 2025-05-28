@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "606315075024-5t80tgv19h58bkb0dnvaq3t8o7satopi.apps.googleusercontent.com",
+          "client_id": "606315075024-7ovj508lvd7e1ql3mhvsuocoikn96jc3.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.spendeex",
-            "certificate_hash": "948770d0e008be8d472c4bb316796ffd8a931d0e"
+            "certificate_hash": "ab1b5aea8425f46ae4ed40881145eca5df9698ae"
           }
         },
         {
