@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spendeex/presentation/screens/category_chip.dart';
 import 'package:spendeex/presentation/screens/select_friend.dart';
+import 'package:spendeex/providers/create_group_provider.dart';
 
 class CreateGroupScreen extends StatefulWidget {
   @override
@@ -10,21 +12,28 @@ class CreateGroupScreen extends StatefulWidget {
 
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
   String? selectedCategory;
-  bool firstPage = false;
+  bool firstPage = true;
+  TextEditingController groupTitleController = TextEditingController();
+  TextEditingController groupDescriptionController = TextEditingController();
+  TextEditingController groupCategoryController = TextEditingController();
 
-  final List<CategoryItem> categories = [
-    CategoryItem(title: 'Trip', emoji: '✈️'),
-    CategoryItem(title: 'Family', emoji: '👨‍👩‍👧‍👦'),
-    CategoryItem(title: 'Couple', emoji: '👫'),
-    CategoryItem(title: 'Event', emoji: '🎂'),
-    CategoryItem(title: 'Project', emoji: '🏢'),
-    CategoryItem(title: 'Other', emoji: '🍀'),
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            if (firstPage) {
+              Navigator.pop(context);
+            } else {
+              setState(() {
+                firstPage = !firstPage;
+              });
+            }
+          },
+          icon: Icon(Icons.arrow_circle_left_sharp),
+        ),
         title: firstPage ? Text('Create Group') : Text('Select friend'),
         actions: [IconButton(icon: Icon(Icons.person_add), onPressed: () {})],
       ),
@@ -43,6 +52,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                         child: Text('Title'),
                       ),
                       TextField(
+                        controller: groupTitleController,
                         decoration: InputDecoration(
                           hintText: 'Enter Title',
                           border: OutlineInputBorder(),
@@ -53,16 +63,12 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                         child: Text('Description'),
                       ),
                       TextField(
+                        controller: groupDescriptionController,
                         decoration: InputDecoration(
                           hintText: 'Enter Description',
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      Title(
-                        color: const Color.fromARGB(255, 255, 90, 78),
-                        child: Text('Title'),
-                      ),
-                      Title(color: Colors.red, child: Text('Category')),
                       AlternativeCategoryWidget(),
                       // Calenda
                     ],
@@ -70,17 +76,47 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 ),
               )
               : SelectFriendsWidget(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            firstPage = !firstPage;
-          });
-        },
-        child:
-            firstPage
-                ? Icon(Icons.arrow_forward_ios)
-                : Icon(Icons.arrow_back_ios),
-        backgroundColor: const Color.fromARGB(255, 255, 90, 78),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // FloatingActionButton(
+          //   onPressed: () async {
+          //     final provider = context.read<CreateGroupProvider>();
+          //     provider.updateGroupDetails(
+          //       groupTitleController.text,
+          //       groupDescriptionController.text,
+          //     );
+
+          //     final error = await provider.createGroup();
+          //     if (error != null) {
+          //       ScaffoldMessenger.of(
+          //         context,
+          //       ).showSnackBar(SnackBar(content: Text(error)));
+          //     } else {
+          //       ScaffoldMessenger.of(
+          //         context,
+          //       ).showSnackBar(SnackBar(content: Text('Group created')));
+          //       groupTitleController.clear();
+          //       groupDescriptionController.clear();
+          //       setState(() => selectedCategory = null);
+          //     }
+          //   },
+          //   child: Icon(Icons.save),
+          //   backgroundColor: const Color.fromARGB(255, 63, 104, 67),
+          // ),
+          FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                firstPage = !firstPage;
+              });
+            },
+            child:
+                firstPage
+                    ? Icon(Icons.arrow_forward_ios)
+                    : Icon(Icons.arrow_back_ios),
+            backgroundColor: const Color.fromARGB(255, 255, 90, 78),
+          ),
+        ],
       ),
     );
   }

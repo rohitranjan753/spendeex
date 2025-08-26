@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:spendeex/providers/create_group_provider.dart';
 
 class CategoryItem {
   final String title;
@@ -10,7 +12,8 @@ class CategoryItem {
 // Alternative implementation using Flutter's built-in widgets
 class AlternativeCategoryWidget extends StatefulWidget {
   @override
-  _AlternativeCategoryWidgetState createState() => _AlternativeCategoryWidgetState();
+  _AlternativeCategoryWidgetState createState() =>
+      _AlternativeCategoryWidgetState();
 }
 
 class _AlternativeCategoryWidgetState extends State<AlternativeCategoryWidget> {
@@ -27,55 +30,57 @@ class _AlternativeCategoryWidgetState extends State<AlternativeCategoryWidget> {
 
   @override
   Widget build(BuildContext context) {
-return 
-       Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Category',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade800,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Category',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade800,
           ),
-          SizedBox(height: 20),
-          // Using FilterChip widgets
-          Wrap(
-            spacing: 12.0,
-            runSpacing: 12.0,
-            children: categories.map((category) {
-              return FilterChip(
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(category.title),
-                    SizedBox(width: 8),
-                    Text(category.emoji),
-                  ],
-                ),
-                selected: selectedCategory == category.title,
-                onSelected: (bool selected) {
-                  setState(() {
-                    selectedCategory = selected ? category.title : null;
-                  });
-                },
-                backgroundColor: Colors.white,
-                selectedColor: Colors.orange,
-                checkmarkColor: Colors.deepPurpleAccent,
-                side: BorderSide(
-                  color: selectedCategory == category.title 
-                      ? Colors.orange.shade300 
-                      : Colors.grey.shade300,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      );
-    
+        ),
+        SizedBox(height: 20),
+        // Using FilterChip widgets
+        Wrap(
+          spacing: 12.0,
+          runSpacing: 12.0,
+          children:
+              categories.map((category) {
+                return FilterChip(
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(category.title),
+                      SizedBox(width: 8),
+                      Text(category.emoji),
+                    ],
+                  ),
+                  selected: selectedCategory == category.title,
+                  onSelected: (bool selected) {
+                    final provider = context.read<CreateGroupProvider>();
+                    setState(() {
+                      selectedCategory = selected ? category.title : null;
+                    });
+                    provider.updateCatgeory(selectedCategory ?? '');
+                  },
+                  backgroundColor: Colors.white,
+                  selectedColor: Colors.orange,
+                  checkmarkColor: Colors.deepPurpleAccent,
+                  side: BorderSide(
+                    color:
+                        selectedCategory == category.title
+                            ? Colors.orange.shade300
+                            : Colors.grey.shade300,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                );
+              }).toList(),
+        ),
+      ],
+    );
   }
 }

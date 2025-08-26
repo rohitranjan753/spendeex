@@ -6,6 +6,7 @@ import 'package:spendeex/presentation/screens/login_screen.dart';
 import 'package:spendeex/presentation/screens/main_screen.dart';
 import 'package:spendeex/providers/auth_provider.dart';
 import 'package:spendeex/providers/bottom_nav_provider.dart';
+import 'package:spendeex/providers/create_group_provider.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -16,6 +17,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => BottomNavProvider()),
+        ChangeNotifierProvider(create: (_)=> CreateGroupProvider()),
       ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
