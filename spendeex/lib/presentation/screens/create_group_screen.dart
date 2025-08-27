@@ -16,7 +16,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   TextEditingController groupTitleController = TextEditingController();
   TextEditingController groupDescriptionController = TextEditingController();
   TextEditingController groupCategoryController = TextEditingController();
-
+  final List<Friend> selectedFriendList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,21 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           icon: Icon(Icons.arrow_circle_left_sharp),
         ),
         title: firstPage ? Text('Create Group') : Text('Select friend'),
-        actions: [IconButton(icon: Icon(Icons.person_add), onPressed: () {})],
+        actions: [
+          if (!firstPage)
+            IconButton(
+              icon: Icon(Icons.person_add),
+              onPressed: () {
+                if (!firstPage) {
+                  setState(() {
+                    firstPage = !firstPage;
+                  });
+                  return;
+                }
+                Navigator.pop(context);
+              },
+            ),
+        ],
       ),
 
       body:
@@ -75,8 +89,22 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   ),
                 ),
               )
-              : SelectFriendsWidget(),
-      floatingActionButton: Row(
+              : SelectFriendsWidget(
+                preSelectedFriends: [...selectedFriendList],
+                onBackPressed: (List<Friend> selectedFriends) {
+                  selectedFriendList.clear();
+                  selectedFriendList.addAll(selectedFriends);
+                  if (kDebugMode) {
+                    print('Selected Friends: $selectedFriendList');
+                  }
+                  setState(() {
+                    firstPage = !firstPage;
+                  });
+                },
+              ),
+      floatingActionButton:
+          firstPage
+              ? Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           // FloatingActionButton(
@@ -111,13 +139,13 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               });
             },
             child:
-                firstPage
-                    ? Icon(Icons.arrow_forward_ios)
-                    : Icon(Icons.arrow_back_ios),
+                
+                    Icon(Icons.arrow_forward_ios),
             backgroundColor: const Color.fromARGB(255, 255, 90, 78),
           ),
         ],
-      ),
+              )
+              : null,
     );
   }
 }

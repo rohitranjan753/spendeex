@@ -6,7 +6,7 @@ class SelectFriendsWidget extends StatefulWidget {
   final Function(List<Friend>)? onSelectionChanged;
   final bool showAppBar;
   final String? title;
-  final VoidCallback? onBackPressed;
+  final Function(List<Friend>)? onBackPressed;
 
   const SelectFriendsWidget({
     Key? key,
@@ -34,14 +34,54 @@ class _SelectFriendsWidgetState extends State<SelectFriendsWidget> {
     
     // Initialize friends list
     allFriends = widget.initialFriends ?? [
-      Friend(id: '1', name: 'Alex McKinney', avatar: '👨‍💼'),
-      Friend(id: '2', name: 'Eleanor Pena', avatar: '👩‍🦱'),
-      Friend(id: '3', name: 'Alecia Johnson', avatar: '👩‍🎓'),
-      Friend(id: '4', name: 'Michael Brown', avatar: '👨‍🎨'),
-      Friend(id: '5', name: 'Sarah Wilson', avatar: '👩‍💻'),
-      Friend(id: '6', name: 'David Martinez', avatar: '👨‍🔬'),
-      Friend(id: '7', name: 'Lisa Anderson', avatar: '👩‍🍳'),
-      Friend(id: '8', name: 'James Taylor', avatar: '👨‍🎤'),
+          Friend(
+            id: '1',
+            name: 'Alex McKinney',
+            avatar: '👨‍💼',
+            email: 'jhondoe1@ok.com',
+          ),
+          Friend(
+            id: '2',
+            name: 'Eleanor Pena',
+            avatar: '👩‍🦱',
+            email: 'jhondoe2@ok.com',
+          ),
+          Friend(
+            id: '3',
+            name: 'Alecia Johnson',
+            avatar: '👩‍🎓',
+            email: 'jhondoe3@ok.com',
+          ),
+          Friend(
+            id: '4',
+            name: 'Michael Brown',
+            avatar: '👨‍🎨',
+            email: 'jhondoe4@ok.com',
+          ),
+          Friend(
+            id: '5',
+            name: 'Sarah Wilson',
+            avatar: '👩‍💻',
+            email: 'jhondoe5@ok.com',
+          ),
+          Friend(
+            id: '6',
+            name: 'David Martinez',
+            avatar: '👨‍🔬',
+            email: 'jhondoe6@ok.com',
+          ),
+          Friend(
+            id: '7',
+            name: 'Lisa Anderson',
+            avatar: '👩‍🍳',
+            email: 'jhondoe7@ok.com',
+          ),
+          Friend(
+            id: '8',
+            name: 'James Taylor',
+            avatar: '👨‍🎤',
+            email: 'jhondoe8@ok.com',
+          ),
     ];
     
     filteredFriends = allFriends;
@@ -50,15 +90,23 @@ class _SelectFriendsWidgetState extends State<SelectFriendsWidget> {
     selectedFriends = widget.preSelectedFriends?.toList() ?? [];
     
     // Add "You" as the first selected friend if not already present
-    if (!selectedFriends.any((f) => f.id == '0')) {
-      selectedFriends.insert(0, Friend(id: '0', name: 'You', avatar: '👤'));
+    if (!selectedFriends.any((f) => f.email == 'rohitgns54321@gmail.com')) {
+      selectedFriends.insert(
+        0,
+        Friend(
+          id: '0',
+          name: 'You',
+          avatar: '👤',
+          email: 'rohitgns54321@gmail.com',
+        ),
+      );
     }
   }
 
   void toggleFriendSelection(Friend friend) {
     setState(() {
-      if (selectedFriends.any((f) => f.id == friend.id)) {
-        selectedFriends.removeWhere((f) => f.id == friend.id);
+      if (selectedFriends.any((f) => f.email == friend.email)) {
+        selectedFriends.removeWhere((f) => f.email == friend.email);
       } else {
         selectedFriends.add(friend);
       }
@@ -69,7 +117,7 @@ class _SelectFriendsWidgetState extends State<SelectFriendsWidget> {
 
   void removeSelectedFriend(Friend friend) {
     setState(() {
-      selectedFriends.removeWhere((f) => f.id == friend.id);
+      selectedFriends.removeWhere((f) => f.email == friend.email);
       // Notify parent widget of selection change
       widget.onSelectionChanged?.call(selectedFriends);
     });
@@ -89,7 +137,7 @@ class _SelectFriendsWidgetState extends State<SelectFriendsWidget> {
   }
 
   bool isFriendSelected(Friend friend) {
-    return selectedFriends.any((f) => f.id == friend.id);
+    return selectedFriends.any((f) => f.email == friend.email);
   }
 
   @override
@@ -123,7 +171,9 @@ class _SelectFriendsWidgetState extends State<SelectFriendsWidget> {
                           itemCount: selectedFriends.length,
                           itemBuilder: (context, index) {
                             Friend friend = selectedFriends[index];
-                            bool canRemove = friend.id != '0'; // Can't remove "You"
+                          bool canRemove =
+                              friend.email !=
+                              'rohitgns54321@gmail.com'; // Can't remove "You"
                             
                             return Container(
                               margin: EdgeInsets.only(right: 16),
@@ -307,6 +357,17 @@ class _SelectFriendsWidgetState extends State<SelectFriendsWidget> {
                 ],
               ),
             ),
+          SizedBox(
+            height: 60,
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                print('Selected Friends: $selectedFriends');
+                widget.onBackPressed?.call(selectedFriends);
+              },
+              child: Text('Done'),
+            ),
+          )
           ],
         ),
  );
@@ -322,10 +383,12 @@ class Friend {
   final String id;
   final String name;
   final String avatar;
+  final String email;
 
   Friend({
     required this.id,
     required this.name,
     required this.avatar,
+    required this.email,
   });
 }
