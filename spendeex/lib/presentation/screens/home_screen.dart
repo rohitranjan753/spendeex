@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spendeex/core/routes/app_routes.dart';
 import 'package:spendeex/providers/bottom_nav_provider.dart';
 import '../../providers/auth_provider.dart';
 
@@ -38,7 +39,7 @@ class HomeScreen extends StatelessWidget {
         onPressed: () {
           // Implement Add Expense Functionality
           // Open create group screen
-          Navigator.pushNamed(context, '/create-group');
+          Navigator.pushNamed(context, AppRoutes.addExpense);
         },
         child: Icon(Icons.add),
       ),

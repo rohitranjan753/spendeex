@@ -107,42 +107,42 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               ? Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // FloatingActionButton(
-          //   onPressed: () async {
-          //     final provider = context.read<CreateGroupProvider>();
-          //     provider.updateGroupDetails(
-          //       groupTitleController.text,
-          //       groupDescriptionController.text,
-          //     );
+                  FloatingActionButton(
+                    onPressed: () async {
+                      final provider = context.read<CreateGroupProvider>();
+                      provider.updateGroupDetails(
+                        groupTitleController.text,
+                        groupDescriptionController.text,
+                      );
 
-          //     final error = await provider.createGroup();
-          //     if (error != null) {
-          //       ScaffoldMessenger.of(
-          //         context,
-          //       ).showSnackBar(SnackBar(content: Text(error)));
-          //     } else {
-          //       ScaffoldMessenger.of(
-          //         context,
-          //       ).showSnackBar(SnackBar(content: Text('Group created')));
-          //       groupTitleController.clear();
-          //       groupDescriptionController.clear();
-          //       setState(() => selectedCategory = null);
-          //     }
-          //   },
-          //   child: Icon(Icons.save),
-          //   backgroundColor: const Color.fromARGB(255, 63, 104, 67),
-          // ),
-          FloatingActionButton(
-            onPressed: () {
-              setState(() {
-                firstPage = !firstPage;
-              });
-            },
-            child:
+                      final error = await provider.createGroup();
+                      if (error != null) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(error)));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Group created')),
+                        );
+                        groupTitleController.clear();
+                        groupDescriptionController.clear();
+                        setState(() => selectedCategory = null);
+                      }
+                    },
+                    child: Icon(Icons.save),
+                    backgroundColor: const Color.fromARGB(255, 63, 104, 67),
+                  ),
+          // FloatingActionButton(
+                  //   onPressed: () {
+                  //     setState(() {
+                  //       firstPage = !firstPage;
+                  //     });
+                  //   },
+                  //   child:
                 
-                    Icon(Icons.arrow_forward_ios),
-            backgroundColor: const Color.fromARGB(255, 255, 90, 78),
-          ),
+                  //           Icon(Icons.arrow_forward_ios),
+                  //   backgroundColor: const Color.fromARGB(255, 255, 90, 78),
+                  // ),
         ],
               )
               : null,

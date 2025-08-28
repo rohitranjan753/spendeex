@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:spendeex/presentation/screens/add_expense_screen.dart';
 
 class GroupDetails extends StatefulWidget {
-  final String groupName;
+  final String? groupName;
 
-  const GroupDetails({Key? key, required this.groupName}) : super(key: key);
+  const GroupDetails({Key? key, this.groupName}) : super(key: key);
 
   @override
   State<GroupDetails> createState() => _GroupDetailsState();

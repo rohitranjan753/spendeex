@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:spendeex/presentation/screens/add_expense_screen.dart';
 import 'package:spendeex/presentation/screens/create_group_screen.dart';
+import 'package:spendeex/presentation/screens/group_details.dart';
+import 'package:spendeex/presentation/screens/group_screen.dart';
 import 'package:spendeex/presentation/screens/home_screen.dart';
 import 'package:spendeex/presentation/screens/login_screen.dart';
 import 'app_routes.dart';
@@ -15,6 +18,15 @@ class AppRouter {
 
       case AppRoutes.createGroup:
         return MaterialPageRoute(builder: (_) => CreateGroupScreen());
+
+      case AppRoutes.groupDetails:
+        return MaterialPageRoute(builder: (_) => GroupDetails());
+
+      case AppRoutes.addExpense:
+        return MaterialPageRoute(builder: (_) => AddExpenseScreen());
+
+      case AppRoutes.groupScreen:
+        return MaterialPageRoute(builder: (_) => GroupScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

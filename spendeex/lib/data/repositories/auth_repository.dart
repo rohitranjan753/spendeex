@@ -24,9 +24,9 @@ class AuthRepository {
       final User? user = userCredential.user;
       print("User credentials: ${userCredential.user}");
 
-      // if (user != null) {
-      //   await _saveUserToFirestore(user);
-      // }
+      if (user != null) {
+        await _saveUserToFirestore(user);
+      }
       
       return user;
     } catch (e) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spendeex/core/routes/app_routes.dart';
 import 'package:spendeex/presentation/screens/create_group_screen.dart';
 import 'package:spendeex/presentation/screens/group_details.dart';
 import 'package:spendeex/presentation/screens/group_details_screen.dart';
@@ -56,7 +57,9 @@ class GroupScreen extends StatelessWidget {
       //   ],
       // ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(context, AppRoutes.createGroup);
+        },
         child: Icon(Icons.add),
       ),
     );

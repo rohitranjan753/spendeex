@@ -7,4 +7,6 @@ class AppRoutes {
   static const String groupDetails = '/group-details';
   static const String settings = '/settings';
   static const String notifications = '/notifications';
+  static const String addExpense = '/add-expense';
+  static const String groupScreen = '/group-screen';
 }

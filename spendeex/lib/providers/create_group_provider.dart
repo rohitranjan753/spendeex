@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
+import 'package:spendeex/core/auth_utils.dart';
 import 'package:spendeex/data/repositories/group_repository.dart';
 
 class CreateGroupProvider with ChangeNotifier {
@@ -31,6 +32,7 @@ class CreateGroupProvider with ChangeNotifier {
       'description': description,
       'category': category,
       'createdAt': FieldValue.serverTimestamp(),
+      'createdBy': AuthUtils.getCurrentUserId(),
     });
 
     return null;
