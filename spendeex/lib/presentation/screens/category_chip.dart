@@ -11,14 +11,21 @@ class CategoryItem {
 
 // Alternative implementation using Flutter's built-in widgets
 class AlternativeCategoryWidget extends StatefulWidget {
+  final Function(String)? onCategorySelected;
+  final String? selectedCategory;
+
+  const AlternativeCategoryWidget({
+    Key? key,
+    this.onCategorySelected,
+    this.selectedCategory,
+  }) : super(key: key);
+
   @override
   _AlternativeCategoryWidgetState createState() =>
       _AlternativeCategoryWidgetState();
 }
 
 class _AlternativeCategoryWidgetState extends State<AlternativeCategoryWidget> {
-  String? selectedCategory;
-
   final List<CategoryItem> categories = [
     CategoryItem(title: 'Trip', emoji: '✈️'),
     CategoryItem(title: 'Family', emoji: '👨‍👩‍👧‍👦'),
@@ -46,39 +53,47 @@ class _AlternativeCategoryWidgetState extends State<AlternativeCategoryWidget> {
         Wrap(
           spacing: 12.0,
           runSpacing: 12.0,
-          children:
-              categories.map((category) {
-                return FilterChip(
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(category.title),
-                      SizedBox(width: 8),
-                      Text(category.emoji),
-                    ],
-                  ),
-                  selected: selectedCategory == category.title,
-                  onSelected: (bool selected) {
-                    final provider = context.read<CreateGroupProvider>();
-                    setState(() {
-                      selectedCategory = selected ? category.title : null;
-                    });
-                    provider.updateCatgeory(selectedCategory ?? '');
-                  },
-                  backgroundColor: Colors.white,
-                  selectedColor: Colors.orange,
-                  checkmarkColor: Colors.deepPurpleAccent,
-                  side: BorderSide(
-                    color:
-                        selectedCategory == category.title
-                            ? Colors.orange.shade300
-                            : Colors.grey.shade300,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                );
-              }).toList(),
+          children: categories.map((category) {
+            final isSelected = widget.selectedCategory == category.title;
+            return FilterChip(
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(category.title),
+                  SizedBox(width: 8),
+                  Text(category.emoji),
+                ],
+              ),
+              selected: isSelected,
+              onSelected: (bool selected) {
+                final selectedCat = selected ? category.title : null;
+                
+                // Call the callback if provided
+                if (widget.onCategorySelected != null && selectedCat != null) {
+                  widget.onCategorySelected!(selectedCat);
+                }
+                
+                // Also update provider for backward compatibility
+                try {
+                  final provider = context.read<CreateGroupProvider>();
+                  provider.updateCategory(selectedCat ?? '');
+                } catch (e) {
+                  // Provider might not be available in all contexts
+                }
+              },
+              backgroundColor: Colors.white,
+              selectedColor: Colors.orange.shade100,
+              checkmarkColor: Colors.orange.shade700,
+              side: BorderSide(
+                color: isSelected
+                    ? Colors.orange.shade300
+                    : Colors.grey.shade300,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+            );
+          }).toList(),
         ),
       ],
     );
