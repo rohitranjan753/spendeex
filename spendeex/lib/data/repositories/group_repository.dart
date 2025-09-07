@@ -76,10 +76,34 @@ class GroupRepository {
             .orderBy('createdAt', descending: true)
             .get();
         
-        groups.addAll(querySnapshot.docs.map((doc) {
+        for (final doc in querySnapshot.docs) {
           final data = doc.data();
-          return GroupModel.fromMap(data, doc.id);
-        }));
+          
+          // Get member count for this group
+          final membersQuery =
+              await _firestore
+                  .collection('group_members')
+                  .where('groupId', isEqualTo: doc.id)
+                  .get();
+
+          final memberIds =
+              membersQuery.docs
+                  .map((memberDoc) => memberDoc.data()['userId'] as String)
+                  .toList();
+
+          // Create group model with populated participants
+          final group = GroupModel(
+            id: doc.id,
+            title: data['title'] ?? '',
+            description: data['description'] ?? '',
+            category: data['category'] ?? '',
+            createdBy: data['createdBy'] ?? '',
+            createdAt: (data['createdAt'] as Timestamp).toDate(),
+            participants: memberIds, // Populate with actual member IDs
+          );
+
+          groups.add(group);
+        }
       }
       
       return groups;
