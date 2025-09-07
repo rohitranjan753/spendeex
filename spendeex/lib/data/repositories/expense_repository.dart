@@ -28,7 +28,7 @@ class ExpenseRepository {
       final querySnapshot = await _firestore
           .collection('expenses')
           .where('groupId', isEqualTo: groupId)
-          .orderBy('createdAt', descending: true)
+          .orderBy('date', descending: true)
           .get();
 
       return querySnapshot.docs.map((doc) {

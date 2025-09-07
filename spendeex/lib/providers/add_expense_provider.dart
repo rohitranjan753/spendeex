@@ -4,28 +4,33 @@ import 'package:spendeex/data/models/expense_model.dart';
 import 'package:spendeex/data/models/group_model.dart';
 import 'package:spendeex/data/repositories/expense_repository.dart';
 import 'package:spendeex/data/repositories/group_repository.dart';
+import 'package:spendeex/data/repositories/activity_logs_repository.dart';
+import 'package:spendeex/data/models/activity_logs_model.dart';
 
 class AddExpenseProvider with ChangeNotifier {
   final ExpenseRepository _expenseRepo = ExpenseRepository();
   final GroupRepository _groupRepo = GroupRepository();
+  final ActivityLogsRepository _activityRepo = ActivityLogsRepository();
 
   // Form state
   String _title = '';
   String _description = '';
+  String _category = '';
   GroupModel? _selectedGroup;
   List<GroupModel> _userGroups = [];
-  List<ExpenseModel> _items = []; // Using ExpenseModel instead of ExpenseItem
+  List<ExpenseModel> _items = [];
   List<String> _selectedParticipants = [];
-  String _selectedSplitType = 'equally';
+  String _selectedSplitType = 'Equally';
   String _paidBy = '';
   bool _isLoading = false;
 
   // Getters
   String get title => _title;
   String get description => _description;
+  String get category => _category;
   GroupModel? get selectedGroup => _selectedGroup;
   List<GroupModel> get userGroups => _userGroups;
-  List<ExpenseModel> get items => _items; // Return ExpenseModel list
+  List<ExpenseModel> get items => _items;
   List<String> get selectedParticipants => _selectedParticipants;
   String get selectedSplitType => _selectedSplitType;
   String get paidBy => _paidBy;
@@ -41,7 +46,7 @@ class AddExpenseProvider with ChangeNotifier {
     final userId = AuthUtils.getCurrentUserId();
     if (userId != null) {
       _userGroups = await _groupRepo.getGroupsByUser(userId);
-      _paidBy = userId; // Default to current user
+      _paidBy = userId;
     }
 
     // Initialize with one empty expense item
@@ -58,10 +63,10 @@ class AddExpenseProvider with ChangeNotifier {
       title: '',
       amount: 0.0,
       paidBy: _paidBy,
-      category: '',
+      category: _category,
       date: DateTime.now(),
       recurring: false,
-      notes: '',
+      notes: _description,
       imageUrl: null,
     );
   }
@@ -76,6 +81,13 @@ class AddExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void updateCategory(String value) {
+    _category = value.trim();
+    // Update existing items with new category
+    _items = _items.map((item) => item.copyWith(category: _category)).toList();
+    notifyListeners();
+  }
+
   void selectGroup(GroupModel group) {
     _selectedGroup = group;
     _selectedParticipants = List.from(group.participants);
@@ -84,9 +96,21 @@ class AddExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void addExpenseItem() {
+    _items.add(_createEmptyExpenseModel());
+    notifyListeners();
+  }
+
   void addExpense() {
     _items.add(_createEmptyExpenseModel());
     notifyListeners();
+  }
+
+  void removeExpenseItem(int index) {
+    if (_items.length > 1) {
+      _items.removeAt(index);
+      notifyListeners();
+    }
   }
 
   void removeExpense(int index) {
@@ -109,6 +133,8 @@ class AddExpenseProvider with ChangeNotifier {
         imageUrl: imageUrl,
         paidBy: _paidBy,
         groupId: _selectedGroup?.id ?? '',
+        category: _category,
+        notes: _description,
       );
       notifyListeners();
     }
@@ -138,22 +164,26 @@ class AddExpenseProvider with ChangeNotifier {
   Map<String, double> _calculateSplitAmounts() {
     final Map<String, double> splitAmounts = {};
     
-    switch (_selectedSplitType) {
+    switch (_selectedSplitType.toLowerCase()) {
       case 'equally':
-        final amountPerPerson = totalAmount / _selectedParticipants.length;
-        for (final participant in _selectedParticipants) {
-          splitAmounts[participant] = amountPerPerson;
+        if (_selectedParticipants.isNotEmpty) {
+          final amountPerPerson = totalAmount / _selectedParticipants.length;
+          for (final participant in _selectedParticipants) {
+            splitAmounts[participant] = amountPerPerson;
+          }
         }
         break;
       case 'unequally':
-      case 'percentage':
-      case 'shares':
-      case 'adjustment':
+      case 'by percentage':
+      case 'by shares':
+      case 'by adjustment':
         // For now, default to equal split
         // These can be implemented later with custom UI
-        final amountPerPerson = totalAmount / _selectedParticipants.length;
-        for (final participant in _selectedParticipants) {
-          splitAmounts[participant] = amountPerPerson;
+        if (_selectedParticipants.isNotEmpty) {
+          final amountPerPerson = totalAmount / _selectedParticipants.length;
+          for (final participant in _selectedParticipants) {
+            splitAmounts[participant] = amountPerPerson;
+          }
         }
         break;
     }
@@ -183,34 +213,58 @@ class AddExpenseProvider with ChangeNotifier {
       return 'Please select who paid for this expense';
     }
 
+    if (_category.isEmpty) {
+      return 'Please select a category';
+    }
+
     _isLoading = true;
     notifyListeners();
 
     try {
-      // For complex expenses, we'll use the ComplexExpenseModel
-      // Use ExpenseModel items directly (no conversion needed)
-      final expenseItems =
-          _items
-              .where((item) => item.title.isNotEmpty && item.amount > 0)
-              .toList();
+      final currentUserId = AuthUtils.getCurrentUserId();
+      if (currentUserId == null) {
+        _isLoading = false;
+        notifyListeners();
+        return 'User not authenticated';
+      }
 
-      final complexExpense = ComplexExpenseModel(
-        id: '', // Will be generated by Firestore
-        title: _title,
-        description: _description,
+      // Create individual ExpenseModel entries for simple expenses
+      for (final item in _items) {
+        if (item.title.isNotEmpty && item.amount > 0) {
+          final expense = item.copyWith(
+            title: item.title,
+            amount: item.amount,
+            paidBy: _paidBy,
+            groupId: _selectedGroup!.id,
+            category: _category,
+            date: DateTime.now(),
+            notes: _description,
+          );
+
+          await _expenseRepo.createExpense(expense);
+
+          // Log activity for each expense
+          await _activityRepo.createActivityLog(ActivityLogsModel(
+            id: '',
+            userId: currentUserId,
+            groupId: _selectedGroup!.id,
+            action: 'create_expense',
+            details: 'Added expense "${item.title}" of ₹${item.amount.toStringAsFixed(2)}',
+            timestamp: DateTime.now(),
+          ));
+        }
+      }
+
+      // Log overall expense activity
+      await _activityRepo.createActivityLog(ActivityLogsModel(
+        id: '',
+        userId: currentUserId,
         groupId: _selectedGroup!.id,
-        paidBy: _paidBy,
-        totalAmount: totalAmount,
-        items: expenseItems, // Now using ExpenseModel directly
-        participants: _selectedParticipants,
-        splitAmounts: _calculateSplitAmounts(),
-        splitType: _selectedSplitType,
-        createdAt: DateTime.now(),
-        createdBy: AuthUtils.getCurrentUserId() ?? '',
-      );
+        action: 'create_expense',
+        details: 'Created expense group "$_title" with total amount ₹${totalAmount.toStringAsFixed(2)}',
+        timestamp: DateTime.now(),
+      ));
 
-      await _expenseRepo.createComplexExpense(complexExpense);
-      
       _isLoading = false;
       notifyListeners();
       return null; // Success
@@ -224,10 +278,11 @@ class AddExpenseProvider with ChangeNotifier {
   void reset() {
     _title = '';
     _description = '';
+    _category = '';
     _selectedGroup = null;
     _items = [_createEmptyExpenseModel()];
     _selectedParticipants = [];
-    _selectedSplitType = 'equally';
+    _selectedSplitType = 'Equally';
     _paidBy = AuthUtils.getCurrentUserId() ?? '';
     notifyListeners();
   }

@@ -77,7 +77,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         SizedBox(height: 16),
                         _buildExpenseDescription(provider),
                         SizedBox(height: 16),
-                        AlternativeCategoryWidget(),
+                        _buildCategorySelection(provider),
                         SizedBox(height: 16),
                         _buildParticipantsSection(provider),
                         SizedBox(height: 16),
@@ -222,6 +222,41 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     );
   }
 
+  Widget _buildCategorySelection(AddExpenseProvider provider) {
+    final categories = ['Food', 'Transport', 'Entertainment', 'Bills', 'Shopping', 'Travel', 'Other'];
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Category',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: categories.map((category) {
+            final isSelected = provider.category == category;
+            return ChoiceChip(
+              label: Text(category),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  provider.updateCategory(category);
+                }
+              },
+              selectedColor: Colors.blue,
+              backgroundColor: Colors.grey[200],
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   Widget _buildParticipantsSection(AddExpenseProvider provider) {
     if (provider.selectedGroup == null) {
       return SizedBox.shrink();
@@ -349,14 +384,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       provider.updateExpense(index, name, amount),
               onRemove:
                   provider.items.length > 1
-                      ? () => provider.removeExpense(index)
+                      ? () => provider.removeExpenseItem(index)
                       : null,
             );
           },
         ),
         SizedBox(height: 12),
         ElevatedButton.icon(
-          onPressed: provider.addExpense,
+          onPressed: provider.addExpenseItem,
           icon: Icon(Icons.add),
           label: Text("Add Item"),
           style: ElevatedButton.styleFrom(
@@ -411,7 +446,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ),
               SizedBox(height: 16),
               ...List.generate(_splitTypes.length, (index) {
-                final splitType = _splitTypes[index].toLowerCase();
+                final splitType = _splitTypes[index];
                 final isSelected = provider.selectedSplitType == splitType;
 
                 return ListTile(
@@ -421,7 +456,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         : Icons.radio_button_unchecked,
                     color: isSelected ? Colors.blue : Colors.grey,
                   ),
-                  title: Text(_splitTypes[index]),
+                  title: Text(splitType),
                   onTap: () {
                     provider.setSplitType(splitType);
                     Navigator.pop(context);
@@ -440,14 +475,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     final error = await provider.saveExpense();
 
     if (error == null) {
-      // Success
+      // Success - reset form and controllers
+      provider.reset();
+      _titleController.clear();
+      _descriptionController.clear();
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Expense saved successfully!'),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, true); // Pass true to indicate success
     } else {
       // Error
       ScaffoldMessenger.of(context).showSnackBar(

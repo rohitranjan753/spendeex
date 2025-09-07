@@ -227,7 +227,10 @@ class _GroupScreenState extends State<GroupScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => GroupDetails(groupName: group.title),
+                builder: (context) => GroupDetails(
+                  groupName: group.title,
+                  groupId: group.id,
+                ),
               ),
             );
           },
