@@ -14,6 +14,15 @@ class ExpenseRepository {
     }
   }
 
+  Future<void> createComplexExpense(ComplexExpenseModel expense) async {
+    try {
+      await _firestore.collection('complex_expenses').add(expense.toMap());
+    } catch (e) {
+      debugPrint("Error creating complex expense: $e");
+      rethrow;
+    }
+  }
+
   Future<List<ExpenseModel>> getExpensesByGroup(String groupId) async {
     try {
       final querySnapshot = await _firestore

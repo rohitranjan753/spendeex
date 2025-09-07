@@ -346,17 +346,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               index: index,
               onUpdate:
                   (name, amount) =>
-                      provider.updateExpenseItem(index, name, amount),
+                      provider.updateExpense(index, name, amount),
               onRemove:
                   provider.items.length > 1
-                      ? () => provider.removeExpenseItem(index)
+                      ? () => provider.removeExpense(index)
                       : null,
             );
           },
         ),
         SizedBox(height: 12),
         ElevatedButton.icon(
-          onPressed: provider.addExpenseItem,
+          onPressed: provider.addExpense,
           icon: Icon(Icons.add),
           label: Text("Add Item"),
           style: ElevatedButton.styleFrom(
@@ -458,7 +458,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 }
 
 class ExpenseItemWidget extends StatefulWidget {
-  final ExpenseItem item;
+  final ExpenseModel item;
   final int index;
   final Function(String name, double amount) onUpdate;
   final VoidCallback? onRemove;
@@ -482,7 +482,7 @@ class _ExpenseItemWidgetState extends State<ExpenseItemWidget> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.item.name);
+    _nameController = TextEditingController(text: widget.item.title);
     _amountController = TextEditingController(
       text: widget.item.amount > 0 ? widget.item.amount.toString() : '',
     );
@@ -513,13 +513,38 @@ class _ExpenseItemWidgetState extends State<ExpenseItemWidget> {
                 "Item ${widget.index + 1}",
                 style: TextStyle(fontWeight: FontWeight.w500),
               ),
-              if (widget.onRemove != null)
-                IconButton(
-                  onPressed: widget.onRemove,
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  constraints: BoxConstraints(),
-                  padding: EdgeInsets.zero,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Add image button for imageUrl support
+                  IconButton(
+                    onPressed: () {
+                      // TODO: Implement image picker for receipt/photo
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Image picker coming soon!')),
+                      );
+                    },
+                    icon: Icon(
+                      widget.item.imageUrl != null
+                          ? Icons.image
+                          : Icons.add_a_photo,
+                      color:
+                          widget.item.imageUrl != null
+                              ? Colors.blue
+                              : Colors.grey,
+                    ),
+                    constraints: BoxConstraints(),
+                    padding: EdgeInsets.zero,
+                  ),
+                  if (widget.onRemove != null)
+                    IconButton(
+                      onPressed: widget.onRemove,
+                      icon: Icon(Icons.delete, color: Colors.red),
+                      constraints: BoxConstraints(),
+                      padding: EdgeInsets.zero,
+                    ),
+                ],
+              ),
             ],
           ),
           SizedBox(height: 8),
@@ -544,6 +569,28 @@ class _ExpenseItemWidgetState extends State<ExpenseItemWidget> {
               prefixText: '₹ ',
             ),
           ),
+          // Show image preview if imageUrl exists
+          if (widget.item.imageUrl != null) ...[
+            SizedBox(height: 8),
+            Container(
+              height: 60,
+              width: 60,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  widget.item.imageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder:
+                      (context, error, stackTrace) =>
+                          Icon(Icons.broken_image, color: Colors.grey),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

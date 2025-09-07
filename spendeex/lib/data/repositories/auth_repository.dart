@@ -36,17 +36,43 @@ class AuthRepository {
   }
 
   Future<void> _saveUserToFirestore(User user) async {
-    DocumentSnapshot userDoc =
-        await _firestore.collection('users').doc(user.uid).get();
+    // First check if a user with this email already exists (created via email)
+    final querySnapshot =
+        await _firestore
+            .collection('users')
+            .where('email', isEqualTo: user.email)
+            .limit(1)
+            .get();
 
-    if (!userDoc.exists) {
-      await _firestore.collection('users').doc(user.uid).set({
-        'uid': user.uid,
-        'name': user.displayName,
-        'email': user.email,
-        'profilePic': user.photoURL ?? '',
-        'createdAt': FieldValue.serverTimestamp(),
+    if (querySnapshot.docs.isNotEmpty) {
+      // User exists with this email, update their profile with Google data
+      final existingDoc = querySnapshot.docs.first;
+      final userData = existingDoc.data();
+      final String? existingName = userData['name'];
+      final String? existingProfilePic = userData['profilePic'];
+
+      // Update the existing document with Google sign-in data
+      await _firestore.collection('users').doc(existingDoc.id).update({
+        'name': user.displayName ?? existingName ?? '',
+        'profilePic': user.photoURL ?? existingProfilePic ?? '',
+        'uid': user.uid, // Update with Firebase Auth UID
+        // Keep the original email and createdAt
       });
+    } else {
+      // Check if user exists with Firebase Auth UID
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(user.uid).get();
+
+      if (!userDoc.exists) {
+        // User doesn't exist, create new document
+        await _firestore.collection('users').doc(user.uid).set({
+          'uid': user.uid,
+          'name': user.displayName,
+          'email': user.email,
+          'profilePic': user.photoURL ?? '',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
     }
   }
 
