@@ -33,6 +33,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   void _showAddPersonBottomSheet() {
     final TextEditingController emailController = TextEditingController();
+    final TextEditingController nameController = TextEditingController();
     bool isLoading = false;
     String? errorMessage;
 
@@ -40,191 +41,246 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Container(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
+      builder:
+          (context) => StatefulBuilder(
+            builder:
+                (context, setModalState) => Container(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
                     ),
                   ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'Add Person',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 20),
-                TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email Address',
-                    hintText: 'Enter email address',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: Icon(Icons.email),
-                    errorText: errorMessage,
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  enabled: !isLoading,
-                ),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: isLoading ? null : () => Navigator.pop(context),
-                        child: Text('Cancel'),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: isLoading
-                            ? null
-                            : () async {
-                                final email = emailController.text.trim();
-                                if (email.isEmpty) {
-                                  setModalState(() {
-                                    errorMessage = 'Please enter an email address';
-                                  });
-                                  return;
-                                }
-
-                                final currentUserEmail =
-                                    AuthUtils.getCurrentUserEmail();
-                                if (currentUserEmail != null &&
-                                    email == currentUserEmail) {
-                                  setModalState(() {
-                                    errorMessage =
-                                        'You cannot add yourself as a friend';
-                                  });
-                                  return;
-                                }
-
-                                if (!RegExp(
-                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                                ).hasMatch(email)) {
-                                  setModalState(() {
-                                    errorMessage =
-                                        'Please enter a valid email address';
-                                  });
-                                  return;
-                                }
-
-                                setModalState(() {
-                                  isLoading = true;
-                                  errorMessage = null;
-                                });
-
-                                try {
-                                  final existingUser =
-                                      await _userRepository.getUserByEmail(email);
-
-                                  if (existingUser != null) {
-                                    Navigator.pop(context);
-                                    _selectFriendsKey.currentState?.addNewFriend(
-                                      email,
-                                      existingUser['name']?.isNotEmpty == true
-                                          ? existingUser['name']
-                                          : _extractNameFromEmail(email),
-                                    );
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'User with email $email added to selection',
-                                        ),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                  } else {
-                                    final newUser = await _userRepository
-                                        .createUserWithEmail(email);
-                                    Navigator.pop(context);
-
-                                    _selectFriendsKey.currentState?.addNewFriend(
-                                      email,
-                                      newUser['name']?.isNotEmpty == true
-                                          ? newUser['name']
-                                          : _extractNameFromEmail(email),
-                                    );
-
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'User with email $email has been added successfully',
-                                        ),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                  }
-                                } catch (e) {
-                                  setModalState(() {
-                                    errorMessage =
-                                        'Failed to add user. Please try again.';
-                                    isLoading = false;
-                                  });
-                                }
-                              },
-                        child: isLoading
-                            ? SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+                        SizedBox(height: 20),
+                        Text(
+                          'Add Person',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 20),
+                        TextField(
+                          controller: nameController,
+                          decoration: InputDecoration(
+                            labelText: 'Full Name *',
+                            hintText: 'Enter full name',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            prefixIcon: Icon(Icons.person),
+                          ),
+                          textCapitalization: TextCapitalization.words,
+                          enabled: !isLoading,
+                        ),
+                        SizedBox(height: 16),
+                        TextField(
+                          controller: emailController,
+                          decoration: InputDecoration(
+                            labelText: 'Email Address *',
+                            hintText: 'Enter email address',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            prefixIcon: Icon(Icons.email),
+                            errorText: errorMessage,
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                          enabled: !isLoading,
+                        ),
+                        SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed:
+                                    isLoading
+                                        ? null
+                                        : () => Navigator.pop(context),
+                                child: Text('Cancel'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                              )
-                            : Text('Add User'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 255, 90, 78),
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed:
+                                    isLoading
+                                        ? null
+                                        : () async {
+                                          final email =
+                                              emailController.text.trim();
+                                          final name =
+                                              nameController.text.trim();
+
+                                          if (name.isEmpty) {
+                                            setModalState(() {
+                                              errorMessage =
+                                                  'Please enter a full name';
+                                            });
+                                            return;
+                                          }
+
+                                          if (email.isEmpty) {
+                                            setModalState(() {
+                                              errorMessage =
+                                                  'Please enter an email address';
+                                            });
+                                            return;
+                                          }
+
+                                          final currentUserEmail =
+                                              AuthUtils.getCurrentUserEmail();
+                                          if (currentUserEmail != null &&
+                                              email == currentUserEmail) {
+                                            setModalState(() {
+                                              errorMessage =
+                                                  'You cannot add yourself as a friend';
+                                            });
+                                            return;
+                                          }
+
+                                          if (!RegExp(
+                                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                          ).hasMatch(email)) {
+                                            setModalState(() {
+                                              errorMessage =
+                                                  'Please enter a valid email address';
+                                            });
+                                            return;
+                                          }
+
+                                          setModalState(() {
+                                            isLoading = true;
+                                            errorMessage = null;
+                                          });
+
+                                          try {
+                                            final existingUser =
+                                                await _userRepository
+                                                    .getUserByEmail(email);
+
+                                            if (existingUser != null) {
+                                              Navigator.pop(context);
+                                              _selectFriendsKey.currentState
+                                                  ?.addNewFriend(
+                                                    email,
+                                                    existingUser['name']
+                                                                ?.isNotEmpty ==
+                                                            true
+                                                        ? existingUser['name']
+                                                        : name,
+                                                    userId:
+                                                        existingUser['uid'], // Pass the actual user ID
+                                                  );
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'User with email $email added to selection',
+                                                  ),
+                                                  backgroundColor: Colors.green,
+                                                ),
+                                              );
+                                            } else {
+                                              final newUser =
+                                                  await _userRepository
+                                                      .createUserWithEmailAndName(
+                                                        email,
+                                                        name,
+                                                      );
+                                              Navigator.pop(context);
+
+                                              _selectFriendsKey.currentState
+                                                  ?.addNewFriend(
+                                                    email,
+                                                    name,
+                                                    userId:
+                                                        newUser['uid'], // Pass the actual user ID from newly created user
+                                                  );
+
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'User "$name" with email $email has been added successfully',
+                                                  ),
+                                                  backgroundColor: Colors.green,
+                                                ),
+                                              );
+                                            }
+                                          } catch (e) {
+                                            setModalState(() {
+                                              errorMessage =
+                                                  'Failed to add user. Please try again.';
+                                              isLoading = false;
+                                            });
+                                          }
+                                        },
+                                child:
+                                    isLoading
+                                        ? SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.white,
+                                                ),
+                                          ),
+                                        )
+                                        : Text('Add User'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color.fromARGB(
+                                    255,
+                                    255,
+                                    90,
+                                    78,
+                                  ),
+                                  foregroundColor: Colors.white,
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                        SizedBox(height: 10),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-                SizedBox(height: 10),
-              ],
-            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -235,9 +291,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       return name
           .split(' ')
           .map(
-            (word) => word.isNotEmpty
-                ? '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}'
-                : '',
+            (word) =>
+                word.isNotEmpty
+                    ? '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}'
+                    : '',
           )
           .join(' ');
     }
@@ -257,7 +314,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              'Group "${groupTitleController.text}" created successfully!'),
+            'Group "${groupTitleController.text}" created successfully!',
+          ),
           backgroundColor: Colors.green,
           duration: Duration(seconds: 3),
         ),
@@ -316,7 +374,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 ),
             ],
           ),
-          body: firstPage ? _buildGroupDetailsPage() : _buildSelectMembersPage(),
+          body:
+              firstPage ? _buildGroupDetailsPage() : _buildSelectMembersPage(),
           floatingActionButton: _buildFloatingActionButton(provider),
         );
       },
@@ -346,8 +405,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
             SizedBox(height: 20),
@@ -368,8 +429,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
             SizedBox(height: 20),
@@ -448,8 +511,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           selectedFriendList.addAll(selectedFriends);
           firstPage = true;
         });
+        print("Selected Friends Updated ${selectedFriendList[1].id}");
         if (kDebugMode) {
-          print('Selected Friends: $selectedFriendList');
+          print('Selected Friends: ${selectedFriendList.toString()}');
         }
       },
     );
@@ -465,16 +529,19 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               onPressed: provider.isLoading ? null : _createGroup,
               backgroundColor: const Color.fromARGB(255, 63, 104, 67),
               foregroundColor: Colors.white,
-              icon: provider.isLoading
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : Icon(Icons.save),
+              icon:
+                  provider.isLoading
+                      ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                      : Icon(Icons.save),
               label: Text(provider.isLoading ? 'Creating...' : 'Create Group'),
             ),
           SizedBox(width: 12),

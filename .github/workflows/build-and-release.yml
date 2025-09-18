@@ -1,0 +1,73 @@
+name: Build and Release Flutter App
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.8'
+        channel: 'stable'
+        cache: true
+
+    - name: Get dependencies
+      run: |
+        cd spendeex
+        flutter pub get
+
+    - name: Create key.properties
+      run: |
+        cd spendeex/android
+        echo "storePassword=${{ secrets.STORE_PASSWORD }}" > key.properties
+        echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> key.properties
+        echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> key.properties
+        echo "storeFile=upload-keystore.jks" >> key.properties
+
+    - name: Decode keystore
+      run: |
+        cd spendeex/android/app
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > upload-keystore.jks
+
+    - name: Build App Bundle
+      run: |
+        cd spendeex
+        flutter build appbundle --release
+
+
+    - name: Upload App Bundle artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-aab
+        path: spendeex/build/app/outputs/bundle/release/app-release.aab
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          spendeex/build/app/outputs/flutter-apk/app-release.apk
+          spendeex/build/app/outputs/bundle/release/app-release.aab
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

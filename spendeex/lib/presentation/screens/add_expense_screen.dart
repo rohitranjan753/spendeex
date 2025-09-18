@@ -89,13 +89,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       ],
                     ),
                   ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _showSplitTypeBottomSheet(provider),
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
-            label: Text("Split: ${provider.selectedSplitType}"),
-            icon: Icon(Icons.splitscreen),
-          ),
+          // floatingActionButton: FloatingActionButton.extended(
+          //   onPressed: () => _showSplitTypeBottomSheet(provider),
+          //   backgroundColor: Colors.blue,
+          //   foregroundColor: Colors.white,
+          //   label: Text("Split: ${provider.selectedSplitType}"),
+          //   icon: Icon(Icons.splitscreen),
+          // ),
         );
       },
     );
@@ -298,7 +298,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        'User ${index + 1}',
+                        provider.getUserNameSync(participantId),
                         style: TextStyle(
                           fontSize: 12,
                           color: isSelected ? Colors.blue : Colors.grey[600],
@@ -350,7 +350,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     return DropdownMenuItem<String>(
                       value: participantId,
                       child: Text(
-                        'User ${provider.selectedGroup!.participants.indexOf(participantId) + 1}',
+                        provider.getUserNameSync(participantId),
                       ),
                     );
                   }).toList(),

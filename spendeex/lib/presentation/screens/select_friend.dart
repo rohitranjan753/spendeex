@@ -106,18 +106,18 @@ class SelectFriendsWidgetState extends State<SelectFriendsWidget> {
     return selectedFriends.any((f) => f.email == friend.email);
   }
 
-  void addNewFriend(String email, String name) {
+  void addNewFriend(String email, String name, {String? userId}) {
     // Don't allow adding the current user as a friend
     final currentUserEmail = AuthUtils.getCurrentUserEmail();
     if (currentUserEmail != null && email == currentUserEmail) {
       return; // Early return if trying to add self
     }
 
-    // Generate a unique ID for the new friend
-    final newId = DateTime.now().millisecondsSinceEpoch.toString();
+    // Use provided userId or generate timestamp as fallback (for backward compatibility)
+    final friendId = userId ?? DateTime.now().millisecondsSinceEpoch.toString();
 
     final newFriend = Friend(
-      id: newId,
+      id: friendId,
       name: name,
       avatar: '👤', // Default profile picture
       email: email,

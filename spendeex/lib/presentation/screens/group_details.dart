@@ -210,7 +210,7 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
               selected: isSelected,
               onSelected: (selected) => provider.setSelectedMember(index),
               label: Text(
-                isAllOption ? 'All' : provider.getMemberName(provider.members[index - 1].userId),
+                isAllOption ? 'All' : provider.getMemberNameSync(provider.members[index - 1].userId),
                 style: TextStyle(
                   color: isSelected ? Colors.white : Colors.blue,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -272,7 +272,7 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 4),
-                Text('Paid by: ${provider.getMemberName(expense.paidBy)}'),
+                Text('Paid by: ${provider.getMemberNameSync(expense.paidBy)}'),
                 Text('Category: ${expense.category}'),
                 Text('Date: ${DateFormat('MMM dd, yyyy').format(expense.date)}'),
               ],
@@ -341,7 +341,7 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
               ),
             ),
             title: Text(
-              provider.getMemberName(member.userId),
+              provider.getMemberNameSync(member.userId),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
@@ -431,7 +431,7 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
                 Text(activity.details),
                 SizedBox(height: 4),
                 Text(
-                  'by ${provider.getMemberName(activity.userId)}',
+                  'by ${provider.getMemberNameSync(activity.userId)}',
                   style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],

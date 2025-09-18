@@ -5,12 +5,14 @@ import 'package:spendeex/data/models/group_model.dart';
 import 'package:spendeex/data/repositories/expense_repository.dart';
 import 'package:spendeex/data/repositories/group_repository.dart';
 import 'package:spendeex/data/repositories/activity_logs_repository.dart';
+import 'package:spendeex/data/repositories/user_repository.dart';
 import 'package:spendeex/data/models/activity_logs_model.dart';
 
 class AddExpenseProvider with ChangeNotifier {
   final ExpenseRepository _expenseRepo = ExpenseRepository();
   final GroupRepository _groupRepo = GroupRepository();
   final ActivityLogsRepository _activityRepo = ActivityLogsRepository();
+  final UserRepository _userRepo = UserRepository();
 
   // Form state
   String _title = '';
@@ -23,6 +25,9 @@ class AddExpenseProvider with ChangeNotifier {
   String _selectedSplitType = 'Equally';
   String _paidBy = '';
   bool _isLoading = false;
+
+  // Cache for user names to avoid repeated API calls
+  final Map<String, String> _userNameCache = {};
 
   // Getters
   String get title => _title;
@@ -272,6 +277,45 @@ class AddExpenseProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return 'Failed to save expense: $e';
+    }
+  }
+
+  // Get user name with caching
+  String getUserNameSync(String userId) {
+    if (_userNameCache.containsKey(userId)) {
+      return _userNameCache[userId]!;
+    }
+    
+    // Return fallback and trigger async fetch
+    _fetchAndCacheUserName(userId);
+    return 'Loading...';
+  }
+
+  // Helper method to fetch and cache user name in background
+  Future<void> _fetchAndCacheUserName(String userId) async {
+    if (_userNameCache.containsKey(userId)) return;
+    
+    try {
+      final userData = await _userRepo.getUserById(userId);
+      if (userData != null) {
+        final name = userData['name'] as String? ?? '';
+        final email = userData['email'] as String? ?? '';
+        
+        String displayName;
+        if (name.isNotEmpty) {
+          displayName = name;
+        } else if (email.isNotEmpty) {
+          displayName = email.split('@')[0];
+        } else {
+          displayName = 'User ${userId.substring(0, 6)}...';
+        }
+        
+        _userNameCache[userId] = displayName;
+        notifyListeners(); // Update UI when name is loaded
+      }
+    } catch (e) {
+      debugPrint("Error fetching user name for $userId: $e");
+      _userNameCache[userId] = 'User ${userId.substring(0, 6)}...';
     }
   }
 
