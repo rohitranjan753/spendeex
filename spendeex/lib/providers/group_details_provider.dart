@@ -81,6 +81,32 @@ class GroupDetailsProvider with ChangeNotifier {
     return allExpensesForDisplay;
   }
 
+  // Filtered members based on selected member (for balances tab)
+  List<GroupMembersModel> get filteredMembers {
+    if (_selectedMemberIndex == 0) {
+      return _members; // Show all members
+    }
+    if (_selectedMemberIndex - 1 < _members.length) {
+      final selectedMember = _members[_selectedMemberIndex - 1];
+      return [selectedMember]; // Show only selected member
+    }
+    return _members;
+  }
+
+  // Filtered activity logs based on selected member
+  List<ActivityLogsModel> get filteredActivityLogs {
+    if (_selectedMemberIndex == 0) {
+      return _activityLogs; // Show all activity
+    }
+    if (_selectedMemberIndex - 1 < _members.length) {
+      final selectedMember = _members[_selectedMemberIndex - 1];
+      return _activityLogs
+          .where((activity) => activity.userId == selectedMember.userId)
+          .toList();
+    }
+    return _activityLogs;
+  }
+
   void setSelectedMember(int index) {
     _selectedMemberIndex = index;
     notifyListeners();

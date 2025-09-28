@@ -303,15 +303,17 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
   }
 
   Widget _buildBalancesTab(GroupDetailsProvider provider) {
-    if (provider.members.isEmpty) {
+    final filteredMembers = provider.filteredMembers;
+    
+    if (filteredMembers.isEmpty) {
       return Center(child: Text('No members found'));
     }
 
     return ListView.builder(
       padding: EdgeInsets.all(16),
-      itemCount: provider.members.length,
+      itemCount: filteredMembers.length,
       itemBuilder: (context, index) {
-        final member = provider.members[index];
+        final member = filteredMembers[index];
         final balance = provider.getUserBalance(member.userId);
         final isPositive = balance > 0;
         final isZero = balance == 0;
@@ -387,7 +389,9 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
   }
 
   Widget _buildActivityTab(GroupDetailsProvider provider) {
-    if (provider.activityLogs.isEmpty) {
+    final filteredActivities = provider.filteredActivityLogs;
+    
+    if (filteredActivities.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -405,9 +409,9 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
 
     return ListView.builder(
       padding: EdgeInsets.all(16),
-      itemCount: provider.activityLogs.length,
+      itemCount: filteredActivities.length,
       itemBuilder: (context, index) {
-        final activity = provider.activityLogs[index];
+        final activity = filteredActivities[index];
         return Card(
           margin: EdgeInsets.only(bottom: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
