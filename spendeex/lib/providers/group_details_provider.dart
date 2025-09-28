@@ -6,6 +6,7 @@ import 'package:spendeex/data/repositories/user_repository.dart';
 import 'package:spendeex/data/models/group_model.dart';
 import 'package:spendeex/data/models/group_members_model.dart';
 import 'package:spendeex/data/models/expense_model.dart';
+import 'package:spendeex/data/models/expense_participants_model.dart';
 import 'package:spendeex/data/models/activity_logs_model.dart';
 
 class GroupDetailsProvider with ChangeNotifier {
@@ -17,6 +18,8 @@ class GroupDetailsProvider with ChangeNotifier {
   GroupModel? _group;
   List<GroupMembersModel> _members = [];
   List<ExpenseModel> _expenses = [];
+  List<ComplexExpenseModel> _complexExpenses = [];
+  List<ExpenseParticipantsModel> _expenseParticipants = [];
   List<ActivityLogsModel> _activityLogs = [];
   Map<String, double> _balances = {};
   bool _isLoading = false;
@@ -30,23 +33,52 @@ class GroupDetailsProvider with ChangeNotifier {
   GroupModel? get group => _group;
   List<GroupMembersModel> get members => _members;
   List<ExpenseModel> get expenses => _expenses;
+  List<ComplexExpenseModel> get complexExpenses => _complexExpenses;
+  List<ExpenseParticipantsModel> get expenseParticipants =>
+      _expenseParticipants;
   List<ActivityLogsModel> get activityLogs => _activityLogs;
   Map<String, double> get balances => _balances;
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get selectedMemberIndex => _selectedMemberIndex;
 
+  // Combined expenses for display (converts complex expenses to simple format for UI compatibility)
+  List<ExpenseModel> get allExpensesForDisplay {
+    final List<ExpenseModel> allExpenses = List.from(_expenses);
+    
+    // Convert complex expenses to simple format for display
+    for (final complexExpense in _complexExpenses) {
+      allExpenses.add(ExpenseModel(
+        id: complexExpense.id,
+        groupId: complexExpense.groupId,
+        title: complexExpense.title,
+        amount: complexExpense.totalAmount,
+        paidBy: complexExpense.paidBy,
+        category: complexExpense.items.isNotEmpty ? complexExpense.items.first.category : 'Other',
+        date: complexExpense.createdAt,
+        recurring: false,
+        notes: complexExpense.description,
+        imageUrl: null,
+      ));
+    }
+    
+    // Sort by date
+    allExpenses.sort((a, b) => b.date.compareTo(a.date));
+    return allExpenses;
+  }
+
   // Filtered expenses based on selected member
   List<ExpenseModel> get filteredExpenses {
     if (_selectedMemberIndex == 0) {
-      return _expenses; // Show all expenses
+      return allExpensesForDisplay; // Show all expenses
     }
     if (_selectedMemberIndex - 1 < _members.length) {
       final selectedMember = _members[_selectedMemberIndex - 1];
-      return _expenses.where((expense) => 
+      return allExpensesForDisplay
+          .where((expense) => 
         expense.paidBy == selectedMember.userId).toList();
     }
-    return _expenses;
+    return allExpensesForDisplay;
   }
 
   void setSelectedMember(int index) {
@@ -74,6 +106,14 @@ class GroupDetailsProvider with ChangeNotifier {
 
       // Load group expenses
       _expenses = await _expenseRepo.getExpensesByGroup(groupId);
+
+      // Load complex expenses
+      _complexExpenses = await _expenseRepo.getComplexExpensesByGroup(groupId);
+
+      // Load expense participants
+      _expenseParticipants = await _expenseRepo.getGroupExpenseParticipants(
+        groupId,
+      );
 
       // Load activity logs
       _activityLogs = await _activityRepo.getActivityLogsByGroup(groupId);
@@ -105,6 +145,11 @@ class GroupDetailsProvider with ChangeNotifier {
     for (final expense in _expenses) {
       userIds.add(expense.paidBy);
     }
+
+    // Add all complex expense payer IDs
+    for (final complexExpense in _complexExpenses) {
+      userIds.add(complexExpense.paidBy);
+    }
     
     // Add all activity log user IDs
     for (final activity in _activityLogs) {
@@ -123,8 +168,73 @@ class GroupDetailsProvider with ChangeNotifier {
       _balances[member.userId] = 0.0;
     }
 
-    // Calculate balances based on expenses
+    // Calculate balances based on expense participants (new system)
+    // Group participants by expense to calculate who paid what
+    final expensePayments = <String, String>{}; // expenseId -> paidBy userId
+
+    // Get payer info for each expense
     for (final expense in _expenses) {
+      expensePayments[expense.id] = expense.paidBy;
+    }
+
+    // Process each expense participant
+    for (final participant in _expenseParticipants) {
+      final participantUserId = participant.userId;
+      final shareAmount = participant.share;
+      final payerId = expensePayments[participant.expenseId];
+
+      if (payerId != null) {
+        // The participant owes their share (unless they paid)
+        if (participantUserId != payerId) {
+          _balances[participantUserId] =
+              (_balances[participantUserId] ?? 0.0) - shareAmount;
+        }
+
+        // The payer gets credit for the full expense amount (we'll handle this separately)
+      }
+    }
+
+    // Calculate total amounts paid by each person
+    final totalPaidByUser = <String, double>{};
+    for (final expense in _expenses) {
+      final paidBy = expense.paidBy;
+      final amount = expense.amount;
+      totalPaidByUser[paidBy] = (totalPaidByUser[paidBy] ?? 0.0) + amount;
+    }
+
+    // Add credits for amounts paid
+    for (final entry in totalPaidByUser.entries) {
+      final userId = entry.key;
+      final amountPaid = entry.value;
+      _balances[userId] = (_balances[userId] ?? 0.0) + amountPaid;
+    }
+
+    // Handle complex expenses (backward compatibility)
+    for (final complexExpense in _complexExpenses) {
+      final paidBy = complexExpense.paidBy;
+      final totalAmount = complexExpense.totalAmount;
+
+      // The person who paid gets credit
+      _balances[paidBy] = (_balances[paidBy] ?? 0.0) + totalAmount;
+
+      // Use the splitAmounts to determine how much each participant owes
+      for (final participantId in complexExpense.participants) {
+        final shareAmount = complexExpense.splitAmounts[participantId] ?? 0.0;
+
+        // Each participant owes their share
+        _balances[participantId] =
+            (_balances[participantId] ?? 0.0) - shareAmount;
+      }
+    }
+
+    // Handle legacy expenses without participant records (split among all members)
+    final expensesWithParticipants =
+        _expenseParticipants.map((p) => p.expenseId).toSet();
+    final legacyExpenses = _expenses.where(
+      (expense) => !expensesWithParticipants.contains(expense.id),
+    );
+
+    for (final expense in legacyExpenses) {
       final paidBy = expense.paidBy;
       final amount = expense.amount;
       final participantCount = _members.length;
@@ -141,7 +251,11 @@ class GroupDetailsProvider with ChangeNotifier {
   }
 
   double getTotalExpenses() {
-    return _expenses.fold(0.0, (sum, expense) => sum + expense.amount);
+    return _expenses.fold(0.0, (sum, expense) => sum + expense.amount) +
+        _complexExpenses.fold(
+          0.0,
+          (sum, complexExpense) => sum + complexExpense.totalAmount,
+        );
   }
 
   double getUserBalance(String userId) {
@@ -233,6 +347,7 @@ class GroupDetailsProvider with ChangeNotifier {
     _group = null;
     _members.clear();
     _expenses.clear();
+    _complexExpenses.clear();
     _activityLogs.clear();
     _balances.clear();
     _userNameCache.clear(); // Clear user name cache

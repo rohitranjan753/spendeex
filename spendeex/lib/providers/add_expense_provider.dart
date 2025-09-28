@@ -95,7 +95,9 @@ class AddExpenseProvider with ChangeNotifier {
 
   void selectGroup(GroupModel group) {
     _selectedGroup = group;
-    _selectedParticipants = List.from(group.participants);
+    // Remove duplicates and initialize selected participants with all unique group members
+    final uniqueParticipants = group.participants.toSet().toList();
+    _selectedParticipants = List.from(uniqueParticipants);
     // Update existing items with new groupId
     _items = _items.map((item) => item.copyWith(groupId: group.id)).toList();
     notifyListeners();
@@ -166,36 +168,6 @@ class AddExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Map<String, double> _calculateSplitAmounts() {
-    final Map<String, double> splitAmounts = {};
-    
-    switch (_selectedSplitType.toLowerCase()) {
-      case 'equally':
-        if (_selectedParticipants.isNotEmpty) {
-          final amountPerPerson = totalAmount / _selectedParticipants.length;
-          for (final participant in _selectedParticipants) {
-            splitAmounts[participant] = amountPerPerson;
-          }
-        }
-        break;
-      case 'unequally':
-      case 'by percentage':
-      case 'by shares':
-      case 'by adjustment':
-        // For now, default to equal split
-        // These can be implemented later with custom UI
-        if (_selectedParticipants.isNotEmpty) {
-          final amountPerPerson = totalAmount / _selectedParticipants.length;
-          for (final participant in _selectedParticipants) {
-            splitAmounts[participant] = amountPerPerson;
-          }
-        }
-        break;
-    }
-    
-    return splitAmounts;
-  }
-
   Future<String?> saveExpense() async {
     if (_title.isEmpty) {
       return 'Please enter an expense title';
@@ -233,7 +205,7 @@ class AddExpenseProvider with ChangeNotifier {
         return 'User not authenticated';
       }
 
-      // Create individual ExpenseModel entries for simple expenses
+      // Create expense entries for each item
       for (final item in _items) {
         if (item.title.isNotEmpty && item.amount > 0) {
           final expense = item.copyWith(
@@ -246,29 +218,44 @@ class AddExpenseProvider with ChangeNotifier {
             notes: _description,
           );
 
-          await _expenseRepo.createExpense(expense);
+          // Calculate split amounts for this specific item
+          final itemSplitAmounts = <String, double>{};
+          final amountPerPerson = item.amount / _selectedParticipants.length;
+          
+          for (final participant in _selectedParticipants) {
+            itemSplitAmounts[participant] = amountPerPerson;
+          }
 
-          // Log activity for each expense
+          // Create expense with participants using ExpenseParticipantsModel
+          await _expenseRepo.createExpenseWithParticipants(expense, itemSplitAmounts);
+
+          // Log activity for each expense item
           await _activityRepo.createActivityLog(ActivityLogsModel(
             id: '',
             userId: currentUserId,
             groupId: _selectedGroup!.id,
             action: 'create_expense',
-            details: 'Added expense "${item.title}" of ₹${item.amount.toStringAsFixed(2)}',
+              details:
+                  'Added expense "${item.title}" of ₹${item.amount.toStringAsFixed(2)} split among ${_selectedParticipants.length} participants',
             timestamp: DateTime.now(),
           ));
         }
       }
 
-      // Log overall expense activity
-      await _activityRepo.createActivityLog(ActivityLogsModel(
-        id: '',
-        userId: currentUserId,
-        groupId: _selectedGroup!.id,
-        action: 'create_expense',
-        details: 'Created expense group "$_title" with total amount ₹${totalAmount.toStringAsFixed(2)}',
-        timestamp: DateTime.now(),
-      ));
+      // Log overall expense activity if multiple items
+      if (_items.length > 1) {
+        await _activityRepo.createActivityLog(
+          ActivityLogsModel(
+            id: '',
+            userId: currentUserId,
+            groupId: _selectedGroup!.id,
+            action: 'create_expense',
+            details:
+                'Created expense group "$_title" with total amount ₹${totalAmount.toStringAsFixed(2)} split among ${_selectedParticipants.length} participants',
+            timestamp: DateTime.now(),
+          ),
+        );
+      }
 
       _isLoading = false;
       notifyListeners();

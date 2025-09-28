@@ -262,6 +262,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       return SizedBox.shrink();
     }
 
+    // Remove duplicates from participants list
+    final uniqueParticipants =
+        provider.selectedGroup!.participants.toSet().toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -274,9 +278,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           height: 80,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: provider.selectedGroup!.participants.length,
+            itemCount: uniqueParticipants.length,
             itemBuilder: (context, index) {
-              final participantId = provider.selectedGroup!.participants[index];
+              final participantId = uniqueParticipants[index];
               final isSelected = provider.selectedParticipants.contains(
                 participantId,
               );
@@ -320,6 +324,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       return SizedBox.shrink();
     }
 
+    // Remove duplicates from participants list
+    final uniqueParticipants =
+        provider.selectedGroup!.participants.toSet().toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -346,12 +354,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 }
               },
               items:
-                  provider.selectedGroup!.participants.map((participantId) {
+                  uniqueParticipants.map((participantId) {
                     return DropdownMenuItem<String>(
                       value: participantId,
-                      child: Text(
-                        provider.getUserNameSync(participantId),
-                      ),
+                      child: Text(provider.getUserNameSync(participantId)),
                     );
                   }).toList(),
             ),

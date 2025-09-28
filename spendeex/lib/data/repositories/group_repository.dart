@@ -159,4 +159,77 @@ class GroupRepository {
       return null;
     }
   }
+
+  /// Get all users who share groups with the current user
+  Future<List<Map<String, dynamic>>> getFriendsFromSharedGroups(
+    String currentUserId,
+  ) async {
+    try {
+      // Get all groups where current user is a member
+      final userGroupsQuery =
+          await _firestore
+              .collection('group_members')
+              .where('userId', isEqualTo: currentUserId)
+              .get();
+
+      if (userGroupsQuery.docs.isEmpty) {
+        return [];
+      }
+
+      final groupIds =
+          userGroupsQuery.docs
+              .map((doc) => doc.data()['groupId'] as String)
+              .toList();
+
+      // Get all members from these groups
+      final Set<String> friendUserIds = {};
+
+      for (final groupId in groupIds) {
+        final membersQuery =
+            await _firestore
+                .collection('group_members')
+                .where('groupId', isEqualTo: groupId)
+                .get();
+
+        for (final memberDoc in membersQuery.docs) {
+          final userId = memberDoc.data()['userId'] as String;
+          if (userId != currentUserId) {
+            // Exclude current user
+            friendUserIds.add(userId);
+          }
+        }
+      }
+
+      // Fetch user details for all friend user IDs
+      final List<Map<String, dynamic>> friends = [];
+
+      // Firestore 'in' query limitation of 10 items, so batch the queries
+      final userIdsList = friendUserIds.toList();
+      for (int i = 0; i < userIdsList.length; i += 10) {
+        final batch = userIdsList.skip(i).take(10).toList();
+        final usersQuery =
+            await _firestore
+                .collection('users')
+                .where(FieldPath.documentId, whereIn: batch)
+                .get();
+
+        for (final userDoc in usersQuery.docs) {
+          final userData = userDoc.data();
+          friends.add({
+            'uid': userDoc.id,
+            'name': userData['name'] ?? '',
+            'email': userData['email'] ?? '',
+            'profilePic': userData['profilePic'] ?? '',
+          });
+        }
+      }
+
+      return friends;
+    } catch (e) {
+      debugPrint(
+        "Error fetching friends from shared groups for user $currentUserId: $e",
+      );
+      return [];
+    }
+  }
 }

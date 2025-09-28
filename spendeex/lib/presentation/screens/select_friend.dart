@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spendeex/core/auth_utils.dart';
+import 'package:spendeex/data/repositories/group_repository.dart';
 
 class SelectFriendsWidget extends StatefulWidget {
   final List<Friend>? initialFriends;
@@ -30,28 +31,88 @@ class SelectFriendsWidgetState extends State<SelectFriendsWidget> {
   List<Friend> allFriends = [];
   List<Friend> filteredFriends = [];
   TextEditingController searchController = TextEditingController();
+  final GroupRepository _groupRepository = GroupRepository();
+  bool _isLoadingFriends = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeFriends();
+  }
 
-    // Get current user's email
+  Future<void> _initializeFriends() async {
+    setState(() {
+      _isLoadingFriends = true;
+    });
+
+    // Get current user's email and ID
     final currentUserEmail = AuthUtils.getCurrentUserEmail();
+    final currentUserId = AuthUtils.getCurrentUserId();
 
-    // Initialize friends list
+    // Initialize friends list with provided initial friends
     List<Friend> initialFriends = widget.initialFriends ?? [];
 
-    // Remove current user from the friends list (users can't select themselves)
-    if (currentUserEmail != null) {
-      allFriends =
-          initialFriends
-              .where((friend) => friend.email != currentUserEmail)
-              .toList();
-    } else {
-      allFriends = initialFriends;
+    // Load friends from shared groups
+    List<Friend> sharedGroupFriends = [];
+    if (currentUserId != null) {
+      try {
+        final friendsData = await _groupRepository.getFriendsFromSharedGroups(
+          currentUserId,
+        );
+        sharedGroupFriends =
+            friendsData.map((friendData) {
+              final name = friendData['name'] as String? ?? '';
+              final email = friendData['email'] as String? ?? '';
+
+              // Generate a display name
+              String displayName;
+              if (name.isNotEmpty) {
+                displayName = name;
+              } else if (email.isNotEmpty) {
+                displayName = email.split('@')[0];
+              } else {
+                displayName = 'User';
+              }
+
+              return Friend(
+                id: friendData['uid'] as String,
+                name: displayName,
+                avatar: '👤', // Default avatar
+                email: email,
+              );
+            }).toList();
+      } catch (e) {
+        debugPrint("Error loading friends from shared groups: $e");
+      }
     }
 
-    filteredFriends = allFriends;
+    // Combine initial friends with shared group friends
+    final Set<String> addedEmails = {};
+    final List<Friend> combinedFriends = [];
+
+    // Add initial friends first
+    for (final friend in initialFriends) {
+      if (friend.email != currentUserEmail &&
+          !addedEmails.contains(friend.email)) {
+        combinedFriends.add(friend);
+        addedEmails.add(friend.email);
+      }
+    }
+
+    // Add shared group friends
+    for (final friend in sharedGroupFriends) {
+      if (friend.email != currentUserEmail &&
+          !addedEmails.contains(friend.email)) {
+        combinedFriends.add(friend);
+        addedEmails.add(friend.email);
+      }
+    }
+
+    setState(() {
+      allFriends = combinedFriends;
+      filteredFriends = allFriends;
+      _isLoadingFriends = false;
+    });
 
     // Initialize selected friends
     selectedFriends = widget.preSelectedFriends?.toList() ?? [];
@@ -59,10 +120,12 @@ class SelectFriendsWidgetState extends State<SelectFriendsWidget> {
     // Add "You" as the first selected friend if not already present
     if (currentUserEmail != null &&
         !selectedFriends.any((f) => f.email == currentUserEmail)) {
-      selectedFriends.insert(
-        0,
-        Friend(id: '0', name: 'You', avatar: '👤', email: currentUserEmail),
-      );
+      setState(() {
+        selectedFriends.insert(
+          0,
+          Friend(id: '0', name: 'You', avatar: '👤', email: currentUserEmail),
+        );
+      });
     }
   }
 
@@ -289,72 +352,130 @@ class SelectFriendsWidgetState extends State<SelectFriendsWidget> {
 
                 // Friends List
                 Expanded(
-                  child: ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: filteredFriends.length,
-                    itemBuilder: (context, index) {
-                      Friend friend = filteredFriends[index];
-                      bool isSelected = isFriendSelected(friend);
-
-                      return Container(
-                        margin: EdgeInsets.only(bottom: 12),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.symmetric(vertical: 8),
-                          leading: Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey.shade200,
-                            ),
-                            child: Center(
-                              child: Text(
-                                friend.avatar,
-                                style: TextStyle(fontSize: 24),
-                              ),
-                            ),
-                          ),
-                          title: Text(
-                            friend.name,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          trailing: GestureDetector(
-                            onTap: () => toggleFriendSelection(friend),
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color:
-                                    isSelected
-                                        ? Colors.blue
-                                        : Colors.transparent,
-                                border: Border.all(
-                                  color:
-                                      isSelected
-                                          ? Colors.blue
-                                          : Colors.grey.shade400,
-                                  width: 2,
+                  child:
+                      _isLoadingFriends
+                          ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(),
+                                SizedBox(height: 16),
+                                Text(
+                                  'Loading friends from your groups...',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                  ),
                                 ),
-                              ),
-                              child:
-                                  isSelected
-                                      ? Icon(
-                                        Icons.check,
-                                        size: 16,
-                                        color: Colors.white,
-                                      )
-                                      : null,
+                              ],
                             ),
+                          )
+                          : filteredFriends.isEmpty
+                          ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.people_outline,
+                                  size: 64,
+                                  color: Colors.grey[400],
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'No friends found',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Add friends to your groups to see them here',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[500],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          )
+                          : ListView.builder(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: filteredFriends.length,
+                            itemBuilder: (context, index) {
+                              Friend friend = filteredFriends[index];
+                              bool isSelected = isFriendSelected(friend);
+
+                              return Container(
+                                margin: EdgeInsets.only(bottom: 12),
+                                child: ListTile(
+                                  contentPadding: EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
+                                  leading: Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.grey.shade200,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        friend.avatar,
+                                        style: TextStyle(fontSize: 24),
+                                      ),
+                                    ),
+                                  ),
+                                  title: Text(
+                                    friend.name,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    friend.email,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  trailing: GestureDetector(
+                                    onTap: () => toggleFriendSelection(friend),
+                                    child: Container(
+                                      width: 24,
+                                      height: 24,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color:
+                                            isSelected
+                                                ? Colors.blue
+                                                : Colors.transparent,
+                                        border: Border.all(
+                                          color:
+                                              isSelected
+                                                  ? Colors.blue
+                                                  : Colors.grey.shade400,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child:
+                                          isSelected
+                                              ? Icon(
+                                                Icons.check,
+                                                size: 16,
+                                                color: Colors.white,
+                                              )
+                                              : null,
+                                    ),
+                                  ),
+                                  onTap: () => toggleFriendSelection(friend),
+                                ),
+                              );
+                            },
                           ),
-                          onTap: () => toggleFriendSelection(friend),
-                        ),
-                      );
-                    },
-                  ),
                 ),
               ],
             ),
