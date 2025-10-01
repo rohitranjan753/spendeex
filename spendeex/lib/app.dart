@@ -10,6 +10,7 @@ import 'package:spendeex/providers/create_group_provider.dart';
 import 'package:spendeex/providers/group_provider.dart';
 import 'package:spendeex/providers/group_details_provider.dart';
 import 'package:spendeex/providers/stats_provider.dart';
+import 'package:spendeex/providers/home_provider.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GroupProvider()),
         ChangeNotifierProvider(create: (_) => GroupDetailsProvider()),
         ChangeNotifierProvider(create: (_) => StatsProvider()),
+        ChangeNotifierProvider(create: (_) => HomeProvider()),
       ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
