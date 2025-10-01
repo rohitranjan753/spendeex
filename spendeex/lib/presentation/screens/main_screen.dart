@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spendeex/presentation/screens/friends_screen.dart';
 import 'package:spendeex/presentation/screens/group_screen.dart';
 import 'package:spendeex/presentation/screens/home_screen.dart';
 import 'package:spendeex/presentation/screens/profile_screen.dart';
@@ -11,7 +12,7 @@ class MainScreen extends StatelessWidget {
   final List<Widget> _screens = [
     HomeScreen(),
     GroupScreen(),
-    StatsScreen(),
+    FriendsScreen(),
     ProfileScreen(),
   ];
 

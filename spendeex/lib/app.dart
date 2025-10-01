@@ -13,6 +13,7 @@ import 'package:spendeex/providers/group_details_provider.dart';
 import 'package:spendeex/providers/stats_provider.dart';
 import 'package:spendeex/providers/home_provider.dart';
 import 'package:spendeex/providers/profile_provider.dart';
+import 'package:spendeex/providers/friends_provider.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => StatsProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => FriendsProvider()),
       ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
