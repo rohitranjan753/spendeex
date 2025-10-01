@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spendeex/config/theme.dart';
 import 'package:spendeex/core/routes/app_routes.dart';
 import 'package:spendeex/presentation/screens/create_group_screen.dart';
 import 'package:spendeex/presentation/screens/group_details.dart';
@@ -15,7 +16,6 @@ class _GroupScreenState extends State<GroupScreen> {
   @override
   void initState() {
     super.initState();
-    // Load groups when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<GroupProvider>().loadUserGroups();
     });
@@ -24,9 +24,12 @@ class _GroupScreenState extends State<GroupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.primaryBlack,
       appBar: AppBar(
         title: Text("Your Groups"),
         centerTitle: true,
+        backgroundColor: AppTheme.primaryBlack,
+        foregroundColor: AppTheme.primaryWhite,
         actions: [
           IconButton(
             icon: Icon(Icons.add),
@@ -35,7 +38,6 @@ class _GroupScreenState extends State<GroupScreen> {
                 context,
                 MaterialPageRoute(builder: (context) => CreateGroupScreen()),
               );
-              // Refresh groups if a new group was created
               if (result == true) {
                 context.read<GroupProvider>().refreshGroups();
               }
@@ -50,9 +52,12 @@ class _GroupScreenState extends State<GroupScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
+                  CircularProgressIndicator(color: AppTheme.primaryWhite),
                   SizedBox(height: 16),
-                  Text("Loading your groups..."),
+                  Text(
+                    "Loading your groups...",
+                    style: TextStyle(color: AppTheme.mediumGrey),
+                  ),
                 ],
               ),
             );
@@ -63,51 +68,60 @@ class _GroupScreenState extends State<GroupScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
                   SizedBox(height: 16),
                   Text(
                     groupProvider.error!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: AppTheme.primaryWhite),
                   ),
                   SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => groupProvider.refreshGroups(),
-                    child: Text("Retry"),
+                    child: Text('Retry'),
                   ),
                 ],
               ),
             );
           }
 
-          if (!groupProvider.hasGroups) {
+          if (groupProvider.userGroups.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.group_add, size: 80, color: Colors.grey),
-                  SizedBox(height: 16),
+                  Icon(
+                    Icons.group_outlined,
+                    size: 80,
+                    color: AppTheme.mediumGrey,
+                  ),
+                  SizedBox(height: 24),
                   Text(
                     "No Groups Yet",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryWhite,
+                    ),
                   ),
                   SizedBox(height: 8),
                   Text(
-                    "Create your first group to start\nsplitting expenses with friends!",
+                    "Create your first group to start\nsplitting expenses with friends",
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppTheme.mediumGrey,
+                    ),
                   ),
-                  SizedBox(height: 24),
+                  SizedBox(height: 32),
                   ElevatedButton.icon(
                     onPressed: () async {
-                      final result = await Navigator.push(
+                      final result = await Navigator.pushNamed(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => CreateGroupScreen(),
-                        ),
+                        AppRoutes.createGroup,
                       );
                       if (result == true) {
-                        groupProvider.refreshGroups();
+                        context.read<GroupProvider>().refreshGroups();
                       }
                     },
                     icon: Icon(Icons.add),
@@ -125,6 +139,8 @@ class _GroupScreenState extends State<GroupScreen> {
           }
 
           return RefreshIndicator(
+            color: AppTheme.primaryWhite,
+            backgroundColor: AppTheme.surfaceBlack,
             onRefresh: () => groupProvider.refreshGroups(),
             child: ListView.builder(
               padding: EdgeInsets.all(16),
@@ -147,6 +163,8 @@ class _GroupScreenState extends State<GroupScreen> {
             context.read<GroupProvider>().refreshGroups();
           }
         },
+        backgroundColor: AppTheme.primaryWhite,
+        foregroundColor: AppTheme.primaryBlack,
         child: Icon(Icons.add),
       ),
     );
@@ -157,22 +175,16 @@ class _GroupScreenState extends State<GroupScreen> {
       margin: EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 3,
+      color: AppTheme.cardBlack,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            colors: [
-              _getCategoryColor(group.category).withOpacity(0.8),
-              _getCategoryColor(group.category).withOpacity(0.6),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          border: Border.all(color: AppTheme.darkGrey),
         ),
         child: ListTile(
           contentPadding: EdgeInsets.all(16),
           leading: CircleAvatar(
-            backgroundColor: Colors.white,
+            backgroundColor: AppTheme.surfaceBlack,
             child: Text(
               _getCategoryEmoji(group.category),
               style: TextStyle(fontSize: 20),
@@ -183,7 +195,7 @@ class _GroupScreenState extends State<GroupScreen> {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 18,
-              color: Colors.white,
+              color: AppTheme.primaryWhite,
             ),
           ),
           subtitle: Column(
@@ -193,7 +205,7 @@ class _GroupScreenState extends State<GroupScreen> {
                 SizedBox(height: 4),
                 Text(
                   group.description,
-                  style: TextStyle(color: Colors.white70),
+                  style: TextStyle(color: AppTheme.lightGrey),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -201,18 +213,18 @@ class _GroupScreenState extends State<GroupScreen> {
               SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.people, size: 16, color: Colors.white70),
+                  Icon(Icons.people, size: 16, color: AppTheme.mediumGrey),
                   SizedBox(width: 4),
                   Text(
                     "${group.participants.length} members",
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: AppTheme.mediumGrey),
                   ),
                   SizedBox(width: 16),
-                  Icon(Icons.calendar_today, size: 16, color: Colors.white70),
+                  Icon(Icons.calendar_today, size: 16, color: AppTheme.mediumGrey),
                   SizedBox(width: 4),
                   Text(
                     _formatDate(group.createdAt),
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: AppTheme.mediumGrey),
                   ),
                 ],
               ),
@@ -220,7 +232,7 @@ class _GroupScreenState extends State<GroupScreen> {
           ),
           trailing: Icon(
             Icons.arrow_forward_ios,
-            color: Colors.white,
+            color: AppTheme.primaryWhite,
             size: 16,
           ),
           onTap: () {
@@ -237,23 +249,6 @@ class _GroupScreenState extends State<GroupScreen> {
         ),
       ),
     );
-  }
-
-  Color _getCategoryColor(String category) {
-    switch (category.toLowerCase()) {
-      case 'trip':
-        return Colors.blue;
-      case 'family':
-        return Colors.green;
-      case 'couple':
-        return Colors.pink;
-      case 'event':
-        return Colors.purple;
-      case 'project':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
   }
 
   String _getCategoryEmoji(String category) {
@@ -276,7 +271,7 @@ class _GroupScreenState extends State<GroupScreen> {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date).inDays;
-
+    
     if (difference == 0) {
       return 'Today';
     } else if (difference == 1) {
@@ -286,7 +281,7 @@ class _GroupScreenState extends State<GroupScreen> {
     } else if (difference < 30) {
       return '${(difference / 7).floor()}w ago';
     } else {
-      return '${date.day}/${date.month}/${date.year}';
+      return '${(difference / 30).floor()}m ago';
     }
   }
 }

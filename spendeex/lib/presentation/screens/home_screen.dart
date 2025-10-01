@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:spendeex/config/theme.dart';
 import 'package:spendeex/core/routes/app_routes.dart';
 import 'package:spendeex/providers/home_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -40,54 +41,53 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
     return Consumer<HomeProvider>(
       builder: (context, provider, child) {
         return Scaffold(
-          backgroundColor: Colors.grey[900],
+          backgroundColor: AppTheme.primaryBlack,
           appBar: AppBar(
             elevation: 0,
-            backgroundColor: Colors.transparent,
+            backgroundColor: AppTheme.primaryBlack,
+            centerTitle: false,
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Good ${_getGreeting()}!',
-                  style: TextStyle(fontSize: 16, color: Colors.grey[400]),
+                  style: TextStyle(fontSize: 16, color: AppTheme.mediumGrey),
                 ),
                 Text(
                   'Dashboard',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryWhite),
                 ),
               ],
             ),
-            actions: [
-              IconButton(
-                icon: Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[800],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Icons.refresh, color: Colors.white),
-                ),
-                onPressed: () => provider.refresh(),
-              ),
-              SizedBox(width: 8),
-              IconButton(
-                icon: Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.red[600],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Icons.logout, color: Colors.white),
-                ),
-                onPressed: () => _showLogoutDialog(context, authProvider),
-              ),
-              SizedBox(width: 16),
-            ],
+            // actions: [
+            //   IconButton(
+            //     icon: Container(
+            //       padding: EdgeInsets.all(8),
+            //       decoration: BoxDecoration(
+            //         color: AppTheme.surfaceBlack,
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //       child: Icon(Icons.refresh, color: AppTheme.primaryWhite),
+            //     ),
+            //     onPressed: () => provider.refresh(),
+            //   ),
+            //   SizedBox(width: 8),
+            //   IconButton(
+            //     icon: Container(
+            //       padding: EdgeInsets.all(8),
+            //       decoration: BoxDecoration(
+            //         color: AppTheme.surfaceBlack,
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //       child: Icon(Icons.logout, color: AppTheme.primaryWhite),
+            //     ),
+            //     onPressed: () => _showLogoutDialog(context, authProvider),
+            //   ),
+            //   SizedBox(width: 16),
+            // ],
           ),
           body: provider.isLoading
               ? _buildLoadingScreen()
@@ -96,6 +96,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   : FadeTransition(
                       opacity: _fadeAnimation,
                       child: RefreshIndicator(
+                        color: AppTheme.primaryWhite,
+                        backgroundColor: AppTheme.surfaceBlack,
                         onRefresh: () => provider.loadDashboardData(),
                         child: SingleChildScrollView(
                           physics: AlwaysScrollableScrollPhysics(),
@@ -129,11 +131,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: Colors.blue),
+          CircularProgressIndicator(color: AppTheme.primaryWhite),
           SizedBox(height: 16),
           Text(
             'Loading your dashboard...',
-            style: TextStyle(color: Colors.grey[400], fontSize: 16),
+            style: TextStyle(color: AppTheme.mediumGrey, fontSize: 16),
           ),
         ],
       ),
@@ -145,17 +147,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 64, color: Colors.red),
+          Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
           SizedBox(height: 16),
           Text(
             'Oops! Something went wrong',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.primaryWhite),
           ),
           SizedBox(height: 8),
           Text(
             provider.error!,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey[400]),
+            style: TextStyle(color: AppTheme.mediumGrey),
           ),
           SizedBox(height: 24),
           ElevatedButton.icon(
@@ -163,8 +165,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             icon: Icon(Icons.refresh),
             label: Text('Try Again'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
+              backgroundColor: AppTheme.primaryWhite,
+              foregroundColor: AppTheme.primaryBlack,
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),
@@ -181,19 +183,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isPositiveBalance 
-              ? [Colors.green[600]!, Colors.green[400]!]
-              : [Colors.red[600]!, Colors.red[400]!],
+              ? [AppTheme.surfaceBlack, AppTheme.cardBlack]
+              : [AppTheme.cardBlack, AppTheme.surfaceBlack],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: (isPositiveBalance ? Colors.green : Colors.red).withOpacity(0.3),
-            blurRadius: 20,
-            offset: Offset(0, 10),
-          ),
-        ],
+        border: Border.all(
+          color: isPositiveBalance ? AppTheme.successGreen : AppTheme.errorRed,
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,12 +205,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: Colors.white.withOpacity(0.9),
+                  color: AppTheme.lightGrey,
                 ),
               ),
               Icon(
                 isPositiveBalance ? Icons.trending_up : Icons.trending_down,
-                color: Colors.white,
+                color: isPositiveBalance ? AppTheme.successGreen : AppTheme.errorRed,
                 size: 24,
               ),
             ],
@@ -222,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppTheme.primaryWhite,
             ),
           ),
           if (!isPositiveBalance)
@@ -230,13 +229,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               "You owe money",
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.8),
+                color: AppTheme.lightGrey,
               ),
             ),
           SizedBox(height: 20),
           Container(
             height: 1,
-            color: Colors.white.withOpacity(0.2),
+            color: AppTheme.darkGrey,
           ),
           SizedBox(height: 16),
           Row(
@@ -246,16 +245,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   "Pending",
                   "₹${provider.pendingPayments.toStringAsFixed(0)}",
                   Icons.schedule,
-                  Colors.orange[300]!,
+                  AppTheme.warningOrange,
                 ),
               ),
-              Container(width: 1, height: 40, color: Colors.white.withOpacity(0.2)),
+              Container(width: 1, height: 40, color: AppTheme.darkGrey),
               Expanded(
                 child: _buildBalanceItem(
                   "Receivables",
                   "₹${provider.receivables.toStringAsFixed(0)}",
                   Icons.account_balance_wallet,
-                  Colors.lightBlue[300]!,
+                  AppTheme.primaryWhite,
                 ),
               ),
             ],
@@ -277,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: Colors.white.withOpacity(0.8),
+              color: AppTheme.lightGrey,
             ),
           ),
           SizedBox(height: 2),
@@ -286,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppTheme.primaryWhite,
             ),
           ),
         ],
@@ -303,7 +302,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppTheme.primaryWhite,
           ),
         ),
         SizedBox(height: 12),
@@ -313,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               child: _buildActionButton(
                 "Add Expense",
                 Icons.add_circle_outline,
-                Colors.blue,
+                AppTheme.primaryWhite,
                 () => Navigator.pushNamed(context, AppRoutes.addExpense),
               ),
             ),
@@ -322,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               child: _buildActionButton(
                 "Create Group",
                 Icons.group_add,
-                Colors.purple,
+                AppTheme.primaryWhite,
                 () => Navigator.pushNamed(context, AppRoutes.createGroup),
               ),
             ),
@@ -331,7 +330,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               child: _buildActionButton(
                 "View Stats",
                 Icons.analytics,
-                Colors.green,
+                AppTheme.primaryWhite,
                 () => Navigator.pushNamed(context, AppRoutes.stats),
               ),
             ),
@@ -347,16 +346,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.grey[800],
+          color: AppTheme.cardBlack,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey[700]!),
+          border: Border.all(color: AppTheme.darkGrey),
         ),
         child: Column(
           children: [
             Container(
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: AppTheme.surfaceBlack,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 24),
@@ -368,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Colors.white,
+                color: AppTheme.primaryWhite,
               ),
             ),
           ],
@@ -383,9 +382,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: AppTheme.cardBlack,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[700]!),
+        border: Border.all(color: AppTheme.darkGrey),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -398,7 +397,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: AppTheme.primaryWhite,
                 ),
               ),
               Text(
@@ -406,7 +405,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: AppTheme.primaryWhite,
                 ),
               ),
             ],
@@ -430,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               if (index >= 0 && index < weeklyData.length) {
                                 return Text(
                                   weeklyData[index]['dayName'],
-                                  style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                                  style: TextStyle(color: AppTheme.mediumGrey, fontSize: 12),
                                 );
                               }
                               return Text('');
@@ -445,22 +444,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             return FlSpot(entry.key.toDouble(), entry.value['amount']);
                           }).toList(),
                           isCurved: true,
-                          color: Colors.blue,
+                          color: AppTheme.primaryWhite,
                           barWidth: 3,
                           dotData: FlDotData(
                             show: true,
                             getDotPainter: (spot, percent, barData, index) {
                               return FlDotCirclePainter(
                                 radius: 4,
-                                color: Colors.blue,
+                                color: AppTheme.primaryWhite,
                                 strokeWidth: 2,
-                                strokeColor: Colors.white,
+                                strokeColor: AppTheme.cardBlack,
                               );
                             },
                           ),
                           belowBarData: BarAreaData(
                             show: true,
-                            color: Colors.blue.withOpacity(0.1),
+                            color: AppTheme.primaryWhite.withOpacity(0.1),
                           ),
                         ),
                       ],
@@ -469,7 +468,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 : Center(
                     child: Text(
                       'No spending data available',
-                      style: TextStyle(color: Colors.grey[400]),
+                      style: TextStyle(color: AppTheme.mediumGrey),
                     ),
                   ),
           ),
@@ -486,9 +485,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: AppTheme.cardBlack,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[700]!),
+        border: Border.all(color: AppTheme.darkGrey),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -498,7 +497,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppTheme.primaryWhite,
             ),
           ),
           SizedBox(height: 16),
@@ -514,7 +513,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 padding: EdgeInsets.symmetric(vertical: 20),
                 child: Text(
                   'No spending data this month',
-                  style: TextStyle(color: Colors.grey[400]),
+                  style: TextStyle(color: AppTheme.mediumGrey),
                 ),
               ),
             ),
@@ -534,7 +533,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             width: 12,
             height: 12,
             decoration: BoxDecoration(
-              color: _getCategoryColor(category),
+              color: AppTheme.getCategoryColor(category),
               borderRadius: BorderRadius.circular(6),
             ),
           ),
@@ -549,14 +548,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     Text(
                       category,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.primaryWhite,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
                       '₹${amount.toStringAsFixed(0)} ($percentage%)',
                       style: TextStyle(
-                        color: Colors.grey[300],
+                        color: AppTheme.lightGrey,
                         fontSize: 12,
                       ),
                     ),
@@ -565,8 +564,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 SizedBox(height: 4),
                 LinearProgressIndicator(
                   value: amount / total,
-                  backgroundColor: Colors.grey[600],
-                  valueColor: AlwaysStoppedAnimation<Color>(_getCategoryColor(category)),
+                  backgroundColor: AppTheme.darkGrey,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.getCategoryColor(category)),
                 ),
               ],
             ),
@@ -582,9 +581,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: AppTheme.cardBlack,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[700]!),
+        border: Border.all(color: AppTheme.darkGrey),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -597,7 +596,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: AppTheme.primaryWhite,
                 ),
               ),
               TextButton(
@@ -606,7 +605,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 },
                 child: Text(
                   'View All',
-                  style: TextStyle(color: Colors.blue),
+                  style: TextStyle(color: AppTheme.primaryWhite),
                 ),
               ),
             ],
@@ -628,11 +627,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 padding: EdgeInsets.symmetric(vertical: 30),
                 child: Column(
                   children: [
-                    Icon(Icons.inbox_outlined, size: 48, color: Colors.grey[600]),
+                    Icon(Icons.inbox_outlined, size: 48, color: AppTheme.mediumGrey),
                     SizedBox(height: 8),
                     Text(
                       'No recent activity',
-                      style: TextStyle(color: Colors.grey[400]),
+                      style: TextStyle(color: AppTheme.mediumGrey),
                     ),
                   ],
                 ),
@@ -657,16 +656,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
     if (isExpense) {
       icon = Icons.receipt_long;
-      iconColor = Colors.blue;
+      iconColor = AppTheme.primaryWhite;
     } else if (isPayment) {
       icon = Icons.payment;
-      iconColor = Colors.green;
+      iconColor = AppTheme.successGreen;
     } else if (isGroup) {
       icon = Icons.group;
-      iconColor = Colors.purple;
+      iconColor = AppTheme.lightGrey;
     } else {
       icon = Icons.info_outline;
-      iconColor = Colors.grey;
+      iconColor = AppTheme.mediumGrey;
     }
 
     return Padding(
@@ -676,7 +675,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           Container(
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: AppTheme.surfaceBlack,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: iconColor, size: 16),
@@ -691,7 +690,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    color: AppTheme.primaryWhite,
                   ),
                 ),
                 if (subtitle.isNotEmpty)
@@ -699,14 +698,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[400],
+                      color: AppTheme.mediumGrey,
                     ),
                   ),
                 Text(
                   'by $user • ${_formatTime(time)}',
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.grey[500],
+                    color: AppTheme.lightGrey,
                   ),
                 ),
               ],
@@ -722,8 +721,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       onPressed: () {
         Navigator.pushNamed(context, AppRoutes.addExpense);
       },
-      backgroundColor: Colors.blue,
-      foregroundColor: Colors.white,
+      backgroundColor: AppTheme.primaryWhite,
+      foregroundColor: AppTheme.primaryBlack,
       icon: Icon(Icons.add),
       label: Text("Add Expense"),
       elevation: 8,
@@ -736,14 +735,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     if (hour < 12) return 'Morning';
     if (hour < 17) return 'Afternoon';
     return 'Evening';
-  }
-
-  Color _getCategoryColor(String category) {
-    final colors = [
-      Colors.blue, Colors.green, Colors.orange, Colors.red,
-      Colors.purple, Colors.teal, Colors.indigo, Colors.amber,
-    ];
-    return colors[category.hashCode % colors.length];
   }
 
   String _formatTime(DateTime time) {
@@ -768,22 +759,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.grey[800],
+          backgroundColor: AppTheme.cardBlack,
           title: Text(
             'Logout',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: AppTheme.primaryWhite),
           ),
           content: Text(
             'Are you sure you want to logout?',
-            style: TextStyle(color: Colors.grey[300]),
+            style: TextStyle(color: AppTheme.lightGrey),
           ),
           actions: [
             TextButton(
-              child: Text('Cancel', style: TextStyle(color: Colors.grey[400])),
+              child: Text('Cancel', style: TextStyle(color: AppTheme.mediumGrey)),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: Text('Logout', style: TextStyle(color: Colors.red)),
+              child: Text('Logout', style: TextStyle(color: AppTheme.errorRed)),
               onPressed: () {
                 Navigator.of(context).pop();
                 authProvider.signOut();

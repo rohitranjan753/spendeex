@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spendeex/config/theme.dart';
 import 'package:spendeex/presentation/screens/add_expense_screen.dart';
 import 'package:spendeex/providers/group_details_provider.dart';
 import 'package:intl/intl.dart';
@@ -41,9 +42,12 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
     return Consumer<GroupDetailsProvider>(
       builder: (context, provider, child) {
         return Scaffold(
+          backgroundColor: AppTheme.primaryBlack,
           appBar: AppBar(
             title: Text(widget.groupName ?? 'Group Details'),
             centerTitle: true,
+            backgroundColor: AppTheme.primaryBlack,
+            foregroundColor: AppTheme.primaryWhite,
             actions: [
               IconButton(
                 icon: Icon(Icons.refresh),
@@ -52,6 +56,9 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
             ],
             bottom: TabBar(
               controller: _tabController,
+              indicatorColor: AppTheme.primaryWhite,
+              labelColor: AppTheme.primaryWhite,
+              unselectedLabelColor: AppTheme.mediumGrey,
               tabs: [
                 Tab(text: 'Expenses', icon: Icon(Icons.receipt)),
                 Tab(text: 'Balances', icon: Icon(Icons.account_balance_wallet)),
@@ -60,7 +67,19 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
             ),
           ),
           body: provider.isLoading
-              ? Center(child: CircularProgressIndicator())
+                  ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(color: AppTheme.primaryWhite),
+                        SizedBox(height: 16),
+                        Text(
+                          "Loading group details...",
+                          style: TextStyle(color: AppTheme.mediumGrey),
+                        ),
+                      ],
+                    ),
+                  )
               : provider.error != null
                   ? _buildErrorWidget(provider)
                   : Column(
@@ -89,6 +108,8 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
                 provider.refreshData();
               }
             },
+            backgroundColor: AppTheme.primaryWhite,
+            foregroundColor: AppTheme.primaryBlack,
             icon: Icon(Icons.add),
             label: Text('Add Expense'),
           ),
@@ -102,12 +123,12 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 64, color: Colors.red),
+          Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
           SizedBox(height: 16),
           Text(
             provider.error!,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: 16, color: AppTheme.primaryWhite),
           ),
           SizedBox(height: 16),
           ElevatedButton(
@@ -127,18 +148,12 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.blue.shade600, Colors.blue.shade400],
+          colors: [AppTheme.surfaceBlack, AppTheme.cardBlack],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: AppTheme.darkGrey),
       ),
       child: Column(
         children: [
@@ -170,12 +185,12 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
   Widget _buildSummaryItem(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: 28),
+        Icon(icon, color: AppTheme.primaryWhite, size: 28),
         SizedBox(height: 8),
         Text(
           value,
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.primaryWhite,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -183,7 +198,7 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
         Text(
           label,
           style: TextStyle(
-            color: Colors.white70,
+            color: AppTheme.lightGrey,
             fontSize: 14,
           ),
         ),
@@ -212,13 +227,19 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
               label: Text(
                 isAllOption ? 'All' : provider.getMemberNameSync(provider.members[index - 1].userId),
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.blue,
+                  color:
+                      isSelected
+                          ? AppTheme.primaryBlack
+                          : AppTheme.primaryWhite,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
-              backgroundColor: Colors.grey.shade200,
-              selectedColor: Colors.blue,
-              checkmarkColor: Colors.white,
+              backgroundColor: AppTheme.surfaceBlack,
+              selectedColor: AppTheme.primaryWhite,
+              checkmarkColor: AppTheme.primaryBlack,
+              side: BorderSide(
+                color: isSelected ? AppTheme.primaryWhite : AppTheme.darkGrey,
+              ),
             ),
           );
         },
@@ -234,16 +255,20 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.receipt_long, size: 64, color: Colors.grey),
+            Icon(Icons.receipt_long, size: 64, color: AppTheme.mediumGrey),
             SizedBox(height: 16),
             Text(
               'No expenses yet',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryWhite,
+              ),
             ),
             SizedBox(height: 8),
             Text(
               'Add your first expense to get started!',
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: AppTheme.mediumGrey),
             ),
           ],
         ),
@@ -257,24 +282,37 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
         final expense = expenses[index];
         return Card(
           margin: EdgeInsets.only(bottom: 12),
+          color: AppTheme.cardBlack,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: ListTile(
             contentPadding: EdgeInsets.all(16),
             leading: CircleAvatar(
-              backgroundColor: Colors.green.shade100,
-              child: Icon(Icons.receipt, color: Colors.green.shade700),
+              backgroundColor: AppTheme.surfaceBlack,
+              child: Icon(Icons.receipt, color: AppTheme.primaryWhite),
             ),
             title: Text(
               expense.title,
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryWhite,
+              ),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 4),
-                Text('Paid by: ${provider.getMemberNameSync(expense.paidBy)}'),
-                Text('Category: ${expense.category}'),
-                Text('Date: ${DateFormat('MMM dd, yyyy').format(expense.date)}'),
+                Text(
+                  'Paid by: ${provider.getMemberNameSync(expense.paidBy)}',
+                  style: TextStyle(color: AppTheme.lightGrey),
+                ),
+                Text(
+                  'Category: ${expense.category}',
+                  style: TextStyle(color: AppTheme.lightGrey),
+                ),
+                Text(
+                  'Date: ${DateFormat('MMM dd, yyyy').format(expense.date)}',
+                  style: TextStyle(color: AppTheme.lightGrey),
+                ),
               ],
             ),
             trailing: Column(
@@ -286,11 +324,11 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                    color: AppTheme.successGreen,
                   ),
                 ),
                 if (expense.imageUrl != null)
-                  Icon(Icons.image, size: 16, color: Colors.grey),
+                  Icon(Icons.image, size: 16, color: AppTheme.mediumGrey),
               ],
             ),
             onTap: () {
@@ -306,7 +344,12 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
     final filteredMembers = provider.filteredMembers;
     
     if (filteredMembers.isEmpty) {
-      return Center(child: Text('No members found'));
+      return Center(
+        child: Text(
+          'No members found',
+          style: TextStyle(color: AppTheme.mediumGrey),
+        ),
+      );
     }
 
     return ListView.builder(
@@ -320,15 +363,16 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
 
         return Card(
           margin: EdgeInsets.only(bottom: 12),
+          color: AppTheme.cardBlack,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: ListTile(
             contentPadding: EdgeInsets.all(16),
             leading: CircleAvatar(
               backgroundColor: isZero
-                  ? Colors.grey.shade200
+                      ? AppTheme.surfaceBlack
                   : isPositive
-                      ? Colors.green.shade100
-                      : Colors.red.shade100,
+                      ? AppTheme.successGreen.withOpacity(0.2)
+                      : AppTheme.errorRed.withOpacity(0.2),
               child: Icon(
                 isZero
                     ? Icons.check
@@ -336,20 +380,26 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
                         ? Icons.arrow_upward
                         : Icons.arrow_downward,
                 color: isZero
-                    ? Colors.grey.shade600
+                        ? AppTheme.mediumGrey
                     : isPositive
-                        ? Colors.green.shade700
-                        : Colors.red.shade700,
+                        ? AppTheme.successGreen
+                        : AppTheme.errorRed,
               ),
             ),
             title: Text(
               provider.getMemberNameSync(member.userId),
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryWhite,
+              ),
             ),
             subtitle: Text(
               member.role.toUpperCase(),
               style: TextStyle(
-                color: member.role == 'admin' ? Colors.orange : Colors.grey,
+                color:
+                    member.role == 'admin'
+                        ? AppTheme.warningOrange
+                        : AppTheme.mediumGrey,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -365,7 +415,7 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
                           : 'Owes',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: AppTheme.mediumGrey,
                   ),
                 ),
                 Text(
@@ -374,10 +424,10 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: isZero
-                        ? Colors.grey
+                            ? AppTheme.mediumGrey
                         : isPositive
-                            ? Colors.green
-                            : Colors.red,
+                            ? AppTheme.successGreen
+                            : AppTheme.errorRed,
                   ),
                 ),
               ],
@@ -396,11 +446,15 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.history, size: 64, color: Colors.grey),
+            Icon(Icons.history, size: 64, color: AppTheme.mediumGrey),
             SizedBox(height: 16),
             Text(
               'No activity yet',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryWhite,
+              ),
             ),
           ],
         ),
@@ -414,29 +468,36 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
         final activity = filteredActivities[index];
         return Card(
           margin: EdgeInsets.only(bottom: 12),
+          color: AppTheme.cardBlack,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: ListTile(
             contentPadding: EdgeInsets.all(16),
             leading: CircleAvatar(
-              backgroundColor: Colors.blue.shade100,
+              backgroundColor: AppTheme.surfaceBlack,
               child: Text(
                 activity.actionIcon,
-                style: TextStyle(fontSize: 20),
+                style: TextStyle(fontSize: 20, color: AppTheme.primaryWhite),
               ),
             ),
             title: Text(
               activity.formattedAction,
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryWhite,
+              ),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 4),
-                Text(activity.details),
+                Text(
+                  activity.details,
+                  style: TextStyle(color: AppTheme.lightGrey),
+                ),
                 SizedBox(height: 4),
                 Text(
                   'by ${provider.getMemberNameSync(activity.userId)}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 12, color: AppTheme.mediumGrey),
                 ),
               ],
             ),
@@ -444,7 +505,7 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
               _formatActivityDate(activity.timestamp),
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey[600],
+                color: AppTheme.mediumGrey,
               ),
             ),
           ),

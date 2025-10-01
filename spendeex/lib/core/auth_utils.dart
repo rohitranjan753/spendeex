@@ -6,7 +6,6 @@ class AuthUtils {
   /// Returns the current user's UID if authenticated, null otherwise
   static String? getCurrentUserId() {
     final User? user = _auth.currentUser;
-    print("Current user in AuthUtils: $user");
     return user?.uid;
   }
 

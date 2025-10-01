@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spendeex/config/theme.dart';
 import 'package:spendeex/core/routes/app_router.dart';
 import 'package:spendeex/presentation/screens/login_screen.dart';
 import 'package:spendeex/presentation/screens/main_screen.dart';
@@ -34,8 +35,8 @@ class MyApp extends StatelessWidget {
         builder: (context, authProvider, _) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            title: 'Split Money',
-            theme: ThemeData.dark(), // Dark Theme
+            title: 'Spendeex',
+            theme: AppTheme.darkTheme,
             onGenerateRoute: AppRouter.generateRoute,
             initialRoute: '/',
             routes: {

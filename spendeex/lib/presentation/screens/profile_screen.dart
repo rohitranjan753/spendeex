@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spendeex/config/theme.dart';
 import 'package:spendeex/providers/profile_provider.dart';
 import 'package:spendeex/data/repositories/auth_repository.dart';
 
@@ -12,7 +13,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Load profile data when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProfileProvider>().loadProfileData();
     });
@@ -24,16 +24,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context, profileProvider, child) {
         if (profileProvider.isLoading) {
           return Scaffold(
-            backgroundColor: Colors.grey[50],
+            backgroundColor: AppTheme.primaryBlack,
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
+                  CircularProgressIndicator(color: AppTheme.primaryWhite),
                   SizedBox(height: 16),
                   Text(
                     'Loading your profile...',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 16, color: AppTheme.mediumGrey),
                   ),
                 ],
               ),
@@ -43,21 +43,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         if (profileProvider.error != null) {
           return Scaffold(
-            backgroundColor: Colors.grey[50],
+            backgroundColor: AppTheme.primaryBlack,
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                  Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
                   SizedBox(height: 16),
                   Text(
                     'Error loading profile',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.primaryWhite),
                   ),
                   SizedBox(height: 8),
                   Text(
                     profileProvider.error!,
-                    style: TextStyle(color: Colors.grey[600]),
+                    style: TextStyle(color: AppTheme.mediumGrey),
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 24),
@@ -72,8 +72,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
 
         return Scaffold(
-          backgroundColor: Colors.grey[50],
+          backgroundColor: AppTheme.primaryBlack,
           body: RefreshIndicator(
+            color: AppTheme.primaryWhite,
+            backgroundColor: AppTheme.surfaceBlack,
             onRefresh: () => profileProvider.refreshProfile(),
             child: CustomScrollView(
               slivers: [
@@ -112,14 +114,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       floating: false,
       pinned: true,
       elevation: 0,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppTheme.primaryBlack,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.blue[600]!, Colors.purple[600]!],
+              colors: [AppTheme.surfaceBlack, AppTheme.cardBlack],
             ),
           ),
           child: SafeArea(
@@ -134,7 +136,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.primaryWhite,
                   ),
                 ),
                 SizedBox(height: 8),
@@ -142,7 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   provider.userEmail,
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white.withOpacity(0.9),
+                    color: AppTheme.lightGrey,
                   ),
                 ),
                 SizedBox(height: 12),
@@ -154,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       actions: [
         IconButton(
-          icon: Icon(Icons.settings_outlined, color: Colors.white),
+          icon: Icon(Icons.settings_outlined, color: AppTheme.primaryWhite),
           onPressed: () {
             // TODO: Navigate to settings screen
           },
@@ -167,10 +169,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 4),
+        border: Border.all(color: AppTheme.primaryWhite, width: 4),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: AppTheme.primaryBlack.withOpacity(0.3),
             blurRadius: 20,
             offset: Offset(0, 8),
           ),
@@ -178,14 +180,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: CircleAvatar(
         radius: 50,
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surfaceBlack,
         backgroundImage:
             provider.userProfilePic != null
                 ? NetworkImage(provider.userProfilePic!)
                 : null,
         child:
             provider.userProfilePic == null
-                ? Icon(Icons.person, size: 50, color: Colors.grey[600])
+                ? Icon(Icons.person, size: 50, color: AppTheme.primaryWhite)
                 : null,
       ),
     );
@@ -195,19 +197,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: AppTheme.primaryWhite.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.primaryWhite.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.star, color: Colors.amber, size: 18),
+          Icon(Icons.star, color: AppTheme.primaryWhite, size: 18),
           SizedBox(width: 6),
           Text(
             "Premium Member",
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.primaryWhite,
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -225,8 +227,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: "Total Spent",
             value: "₹${provider.totalSpent.toStringAsFixed(0)}",
             icon: Icons.trending_down,
-            color: Colors.red[400]!,
-            backgroundColor: Colors.red[50]!,
+            color: AppTheme.errorRed,
+            backgroundColor: AppTheme.surfaceBlack,
           ),
         ),
         SizedBox(width: 16),
@@ -235,8 +237,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: "Money Owed",
             value: "₹${provider.moneyOwed.toStringAsFixed(0)}",
             icon: Icons.account_balance_wallet,
-            color: Colors.orange[400]!,
-            backgroundColor: Colors.orange[50]!,
+            color: AppTheme.warningOrange,
+            backgroundColor: AppTheme.surfaceBlack,
           ),
         ),
       ],
@@ -255,7 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.darkGrey),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,7 +268,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: AppTheme.mediumGrey,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -276,7 +278,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: color,
+              color: AppTheme.primaryWhite,
             ),
           ),
         ],
@@ -293,7 +295,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
+            color: AppTheme.primaryWhite,
           ),
         ),
         SizedBox(height: 16),
@@ -303,7 +305,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: _buildActionButton(
                 title: "Add Expense",
                 icon: Icons.add_circle_outline,
-                color: Colors.green[600]!,
+                color: AppTheme.successGreen,
                 onTap: () {
                   Navigator.pushNamed(context, '/add-expense');
                 },
@@ -314,20 +316,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: _buildActionButton(
                 title: "Split Bill",
                 icon: Icons.call_split,
-                color: Colors.blue[600]!,
+                color: AppTheme.primaryWhite,
                 onTap: () {
                   Navigator.pushNamed(context, '/add-expense');
+                },
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildActionButton(
+                title: "View Stats",
+                icon: Icons.analytics_outlined,
+                color: AppTheme.lightGrey,
+                onTap: () {
+                  Navigator.pushNamed(context, '/stats');
                 },
               ),
             ),
             SizedBox(width: 12),
             Expanded(
               child: _buildActionButton(
-                title: "View Stats",
-                icon: Icons.analytics_outlined,
-                color: Colors.purple[600]!,
+                title: "Settings",
+                icon: Icons.settings_outlined,
+                color: AppTheme.mediumGrey,
                 onTap: () {
-                  Navigator.pushNamed(context, '/stats');
+                  // TODO: Navigate to settings
                 },
               ),
             ),
@@ -348,15 +365,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surfaceBlack,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            ),
-          ],
+          border: Border.all(color: AppTheme.darkGrey),
         ),
         child: Column(
           children: [
@@ -367,7 +378,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
+                color: AppTheme.primaryWhite,
               ),
             ),
           ],
@@ -390,29 +401,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+                color: AppTheme.primaryWhite,
               ),
             ),
             TextButton(
               onPressed: () {
                 // TODO: Navigate to all activities
               },
-              child: Text("View All"),
+              child: Text("View All", style: TextStyle(color: AppTheme.primaryWhite)),
             ),
           ],
         ),
         SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.surfaceBlack,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 10,
-                offset: Offset(0, 2),
-              ),
-            ],
+            border: Border.all(color: AppTheme.darkGrey),
           ),
           child:
               activities.isEmpty
@@ -424,14 +429,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Icon(
                             Icons.history,
                             size: 48,
-                            color: Colors.grey[300],
+                            color: AppTheme.mediumGrey,
                           ),
                           SizedBox(height: 16),
                           Text(
                             'No recent activity',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.grey[500],
+                              color: AppTheme.mediumGrey,
                             ),
                           ),
                         ],
@@ -456,16 +461,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         : Icons.notifications,
                                 iconColor:
                                     activity['isExpense']
-                                        ? Colors.blue[400]!
+                                        ? AppTheme.primaryWhite
                                         : activity['isPayment']
-                                        ? Colors.green[400]!
-                                        : Colors.purple[400]!,
-                                iconBg:
-                                    activity['isExpense']
-                                        ? Colors.blue[50]!
-                                        : activity['isPayment']
-                                        ? Colors.green[50]!
-                                        : Colors.purple[50]!,
+                                        ? AppTheme.successGreen
+                                        : AppTheme.lightGrey,
+                                iconBg: AppTheme.cardBlack,
                                 isLast: index == activities.length - 1,
                               ),
                               if (index < activities.length - 1)
@@ -510,18 +510,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.grey[800],
+                    color: AppTheme.primaryWhite,
                   ),
                 ),
                 SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                  style: TextStyle(fontSize: 14, color: AppTheme.mediumGrey),
                 ),
               ],
             ),
           ),
-          Icon(Icons.chevron_right, color: Colors.grey[400]),
+          Icon(Icons.chevron_right, color: AppTheme.mediumGrey),
         ],
       ),
     );
@@ -541,29 +541,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+                color: AppTheme.primaryWhite,
               ),
             ),
             TextButton(
               onPressed: () {
                 // TODO: Navigate to all expenses
               },
-              child: Text("View All"),
+              child: Text("View All", style: TextStyle(color: AppTheme.primaryWhite)),
             ),
           ],
         ),
         SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.surfaceBlack,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 10,
-                offset: Offset(0, 2),
-              ),
-            ],
+            border: Border.all(color: AppTheme.darkGrey),
           ),
           child:
               expenses.isEmpty
@@ -575,14 +569,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Icon(
                             Icons.receipt_outlined,
                             size: 48,
-                            color: Colors.grey[300],
+                            color: AppTheme.mediumGrey,
                           ),
                           SizedBox(height: 16),
                           Text(
                             'No recent expenses',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.grey[500],
+                              color: AppTheme.mediumGrey,
                             ),
                           ),
                         ],
@@ -634,13 +628,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.grey[800],
+                    color: AppTheme.primaryWhite,
                   ),
                 ),
                 SizedBox(height: 4),
                 Text(
                   category,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                  style: TextStyle(fontSize: 14, color: AppTheme.mediumGrey),
                 ),
               ],
             ),
@@ -653,21 +647,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: settled ? Colors.green[600] : Colors.orange[600],
+                  color: settled ? AppTheme.successGreen : AppTheme.warningOrange,
                 ),
               ),
               SizedBox(height: 4),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: settled ? Colors.green[50] : Colors.orange[50],
+                  color: settled ? AppTheme.successGreen.withOpacity(0.2) : AppTheme.warningOrange.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   settled ? "Settled" : "Pending",
                   style: TextStyle(
                     fontSize: 12,
-                    color: settled ? Colors.green[600] : Colors.orange[600],
+                    color: settled ? AppTheme.successGreen : AppTheme.warningOrange,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -684,12 +678,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       width: double.infinity,
       child: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red[50],
-          foregroundColor: Colors.red[600],
+          backgroundColor: AppTheme.errorRed.withOpacity(0.2),
+          foregroundColor: AppTheme.errorRed,
           padding: EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
-          side: BorderSide(color: Colors.red[200]!),
+          side: BorderSide(color: AppTheme.errorRed.withOpacity(0.5)),
         ),
         icon: Icon(Icons.logout_outlined),
         label: Text(
@@ -708,20 +702,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: AppTheme.cardBlack,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: Text("Logout"),
-          content: Text("Are you sure you want to logout?"),
+          title: Text("Logout", style: TextStyle(color: AppTheme.primaryWhite)),
+          content: Text("Are you sure you want to logout?", style: TextStyle(color: AppTheme.lightGrey)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
+              child: Text("Cancel", style: TextStyle(color: AppTheme.mediumGrey)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red[600],
-                foregroundColor: Colors.white,
+                backgroundColor: AppTheme.errorRed,
+                foregroundColor: AppTheme.primaryWhite,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -735,7 +730,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Failed to logout: $e'),
-                      backgroundColor: Colors.red,
+                      backgroundColor: AppTheme.errorRed,
                     ),
                   );
                 }

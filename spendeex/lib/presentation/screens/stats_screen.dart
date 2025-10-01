@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:spendeex/config/theme.dart';
 import 'package:spendeex/providers/stats_provider.dart';
 
 class StatsScreen extends StatefulWidget {
@@ -23,10 +24,11 @@ class _StatsScreenState extends State<StatsScreen> {
     return Consumer<StatsProvider>(
       builder: (context, provider, child) {
         return Scaffold(
+          backgroundColor: AppTheme.primaryBlack,
           appBar: AppBar(
             title: Text("Statistics"),
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
+            backgroundColor: AppTheme.primaryBlack,
+            foregroundColor: AppTheme.primaryWhite,
             actions: [
               IconButton(
                 icon: Icon(Icons.refresh),
@@ -40,10 +42,24 @@ class _StatsScreenState extends State<StatsScreen> {
           ),
           body:
               provider.isLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(color: AppTheme.primaryWhite),
+                        SizedBox(height: 16),
+                        Text(
+                          "Loading statistics...",
+                          style: TextStyle(color: AppTheme.mediumGrey),
+                        ),
+                      ],
+                    ),
+                  )
                   : provider.error != null
                   ? _buildErrorWidget(provider)
                   : RefreshIndicator(
+                    color: AppTheme.primaryWhite,
+                    backgroundColor: AppTheme.surfaceBlack,
                     onRefresh: () => provider.loadStatsData(),
                     child: SingleChildScrollView(
                       physics: AlwaysScrollableScrollPhysics(),
@@ -76,12 +92,12 @@ class _StatsScreenState extends State<StatsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 64, color: Colors.red),
+          Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
           SizedBox(height: 16),
           Text(
             provider.error!,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: 16, color: AppTheme.primaryWhite),
           ),
           SizedBox(height: 16),
           ElevatedButton(
@@ -96,6 +112,7 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget _buildMonthSelector(StatsProvider provider) {
     return Card(
       elevation: 3,
+      color: AppTheme.cardBlack,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -104,7 +121,11 @@ class _StatsScreenState extends State<StatsScreen> {
           children: [
             Text(
               "Select Month",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16, 
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryWhite,
+              ),
             ),
             SizedBox(height: 8),
             Row(
@@ -118,8 +139,9 @@ class _StatsScreenState extends State<StatsScreen> {
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: AppTheme.darkGrey),
                         borderRadius: BorderRadius.circular(8),
+                        color: AppTheme.surfaceBlack,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -128,9 +150,12 @@ class _StatsScreenState extends State<StatsScreen> {
                             DateFormat(
                               'MMMM yyyy',
                             ).format(provider.selectedMonth),
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: AppTheme.primaryWhite,
+                            ),
                           ),
-                          Icon(Icons.calendar_today, color: Colors.blue),
+                          Icon(Icons.calendar_today, color: AppTheme.primaryWhite),
                         ],
                       ),
                     ),
@@ -152,6 +177,7 @@ class _StatsScreenState extends State<StatsScreen> {
 
     return Card(
       elevation: 3,
+      color: AppTheme.cardBlack,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -162,39 +188,29 @@ class _StatsScreenState extends State<StatsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Monthly Breakdown",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  "Monthly Overview",
+                  style: TextStyle(
+                    fontSize: 16, 
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryWhite,
+                  ),
                 ),
                 Text(
                   DateFormat('MMM yyyy').format(provider.selectedMonth),
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.mediumGrey,
+                  ),
                 ),
               ],
             ),
-            SizedBox(height: 8),
-            Text(
-              "Total Spending: ₹${totalSpending.toStringAsFixed(2)}",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            SizedBox(height: 12),
+            SizedBox(height: 16),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildSummaryBox(
-                  "Pending",
-                  "₹${pending.toStringAsFixed(0)}",
-                  Colors.orange,
-                ),
-                _buildSummaryBox(
-                  "Owed to You",
-                  "₹${owed.toStringAsFixed(0)}",
-                  Colors.green,
-                ),
-                _buildSummaryBox(
-                  "Settled",
-                  "₹${settled.toStringAsFixed(0)}",
-                  Colors.blue,
-                ),
+                _buildSummaryBox("Total", "₹${totalSpending.toStringAsFixed(0)}", AppTheme.primaryWhite),
+                _buildSummaryBox("Pending", "₹${pending.toStringAsFixed(0)}", AppTheme.warningOrange),
+                _buildSummaryBox("Owed", "₹${owed.toStringAsFixed(0)}", AppTheme.errorRed),
+                _buildSummaryBox("Settled", "₹${settled.toStringAsFixed(0)}", AppTheme.successGreen),
               ],
             ),
             if (totalSpending > 0) ...[
@@ -215,7 +231,11 @@ class _StatsScreenState extends State<StatsScreen> {
           children: [
             Text(
               title,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              style: TextStyle(
+                fontWeight: FontWeight.bold, 
+                fontSize: 12,
+                color: AppTheme.lightGrey,
+              ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 4),
@@ -223,14 +243,15 @@ class _StatsScreenState extends State<StatsScreen> {
               width: double.infinity,
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color,
+                color: color.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: color.withOpacity(0.5)),
               ),
               child: Text(
                 amount,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.white,
+                  color: color,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
@@ -244,48 +265,42 @@ class _StatsScreenState extends State<StatsScreen> {
 
   Widget _buildBalanceIndicator(double pending, double owed, double settled) {
     final total = pending + owed + settled;
-    if (total <= 0) return SizedBox.shrink();
+    if (total == 0) return SizedBox.shrink();
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Balance Overview",
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          "Payment Status",
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.lightGrey,
+          ),
         ),
-        SizedBox(height: 4),
+        SizedBox(height: 8),
         Container(
           height: 8,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
-            color: Colors.grey[300],
           ),
           child: Row(
             children: [
               if (pending > 0)
                 Expanded(
                   flex: (pending * 100 / total).round(),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(4),
-                        bottomLeft: Radius.circular(4),
-                      ),
-                    ),
-                  ),
+                  child: Container(color: AppTheme.warningOrange),
                 ),
               if (owed > 0)
                 Expanded(
                   flex: (owed * 100 / total).round(),
-                  child: Container(color: Colors.green),
+                  child: Container(color: AppTheme.errorRed),
                 ),
               if (settled > 0)
                 Expanded(
                   flex: (settled * 100 / total).round(),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: AppTheme.successGreen,
                       borderRadius: BorderRadius.only(
                         topRight: Radius.circular(4),
                         bottomRight: Radius.circular(4),
@@ -305,6 +320,7 @@ class _StatsScreenState extends State<StatsScreen> {
 
     return Card(
       elevation: 3,
+      color: AppTheme.cardBlack,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -313,12 +329,16 @@ class _StatsScreenState extends State<StatsScreen> {
           children: [
             Text(
               "Spending Pattern (Last 6 Months)",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16, 
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryWhite,
+              ),
             ),
             if (provider.selectedCategory != 'All')
               Text(
                 "Category: ${provider.selectedCategory}",
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 12, color: AppTheme.mediumGrey),
               ),
             SizedBox(height: 16),
             SizedBox(
@@ -333,7 +353,7 @@ class _StatsScreenState extends State<StatsScreen> {
                             horizontalInterval: _calculateInterval(graphData),
                             getDrawingHorizontalLine: (value) {
                               return FlLine(
-                                color: Colors.grey[300]!,
+                                color: AppTheme.darkGrey,
                                 strokeWidth: 1,
                               );
                             },
@@ -355,19 +375,15 @@ class _StatsScreenState extends State<StatsScreen> {
                                   double value,
                                   TitleMeta meta,
                                 ) {
-                                  final month = graphData.firstWhere(
+                                  final monthData = graphData.firstWhere(
                                     (data) => data['month'] == value,
                                     orElse: () => {'monthName': ''},
                                   );
-                                  return SideTitleWidget(
-                                    axisSide: meta.axisSide,
-                                    child: Text(
-                                      month['monthName'] ?? '',
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
-                                      ),
+                                  return Text(
+                                    monthData['monthName']?.substring(0, 3) ?? '',
+                                    style: TextStyle(
+                                      color: AppTheme.mediumGrey,
+                                      fontSize: 12,
                                     ),
                                   );
                                 },
@@ -376,17 +392,12 @@ class _StatsScreenState extends State<StatsScreen> {
                             leftTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
-                                interval: _calculateInterval(graphData),
-                                reservedSize: 60,
-                                getTitlesWidget: (
-                                  double value,
-                                  TitleMeta meta,
-                                ) {
+                                reservedSize: 40,
+                                getTitlesWidget: (value, meta) {
                                   return Text(
-                                    '₹${_formatAmount(value)}',
+                                    '₹${(value / 1000).toStringAsFixed(0)}k',
                                     style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.mediumGrey,
                                       fontSize: 10,
                                     ),
                                   );
@@ -397,7 +408,7 @@ class _StatsScreenState extends State<StatsScreen> {
                           borderData: FlBorderData(
                             show: true,
                             border: Border.all(
-                              color: Colors.grey[300]!,
+                              color: AppTheme.darkGrey,
                               width: 1,
                             ),
                           ),
@@ -429,7 +440,7 @@ class _StatsScreenState extends State<StatsScreen> {
                                       )
                                       .toList(),
                               isCurved: true,
-                              color: Colors.blue,
+                              color: AppTheme.primaryWhite,
                               barWidth: 3,
                               isStrokeCapRound: true,
                               dotData: FlDotData(
@@ -437,15 +448,15 @@ class _StatsScreenState extends State<StatsScreen> {
                                 getDotPainter: (spot, percent, barData, index) {
                                   return FlDotCirclePainter(
                                     radius: 4,
-                                    color: Colors.blue,
+                                    color: AppTheme.primaryWhite,
                                     strokeWidth: 2,
-                                    strokeColor: Colors.white,
+                                    strokeColor: AppTheme.cardBlack,
                                   );
                                 },
                               ),
                               belowBarData: BarAreaData(
                                 show: true,
-                                color: Colors.blue.withOpacity(0.3),
+                                color: AppTheme.primaryWhite.withOpacity(0.1),
                               ),
                             ),
                           ],
@@ -453,7 +464,7 @@ class _StatsScreenState extends State<StatsScreen> {
                             enabled: true,
                             touchTooltipData: LineTouchTooltipData(
                               getTooltipColor:
-                                  (touchedSpot) => Colors.blueAccent,
+                                  (touchedSpot) => AppTheme.cardBlack,
                               getTooltipItems: (
                                 List<LineBarSpot> touchedBarSpots,
                               ) {
@@ -463,8 +474,8 @@ class _StatsScreenState extends State<StatsScreen> {
                                   );
                                   return LineTooltipItem(
                                     '${monthData['monthName']}\n₹${barSpot.y.toStringAsFixed(0)}',
-                                    const TextStyle(
-                                      color: Colors.white,
+                                    TextStyle(
+                                      color: AppTheme.primaryWhite,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   );
@@ -477,7 +488,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       : Center(
                         child: Text(
                           'No spending data available',
-                          style: TextStyle(color: Colors.grey[600]),
+                          style: TextStyle(color: AppTheme.mediumGrey),
                         ),
                       ),
             ),
@@ -490,6 +501,7 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget _buildCategoryFilter(StatsProvider provider) {
     return Card(
       elevation: 3,
+      color: AppTheme.cardBlack,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -498,26 +510,35 @@ class _StatsScreenState extends State<StatsScreen> {
           children: [
             Text(
               "Filter by Category",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16, 
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryWhite,
+              ),
             ),
             SizedBox(height: 8),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: AppTheme.surfaceBlack,
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 8,
                 ),
               ),
+              dropdownColor: AppTheme.surfaceBlack,
+              style: TextStyle(color: AppTheme.primaryWhite),
               value: provider.selectedCategory,
               items:
                   provider.availableCategories
                       .map(
                         (category) => DropdownMenuItem(
                           value: category,
-                          child: Text(category),
+                          child: Text(
+                            category,
+                            style: TextStyle(color: AppTheme.primaryWhite),
+                          ),
                         ),
                       )
                   .toList(),
@@ -542,6 +563,7 @@ class _StatsScreenState extends State<StatsScreen> {
 
     return Card(
       elevation: 3,
+      color: AppTheme.cardBlack,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -550,7 +572,11 @@ class _StatsScreenState extends State<StatsScreen> {
           children: [
             Text(
               "Category Breakdown",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16, 
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryWhite,
+              ),
             ),
             SizedBox(height: 12),
             ...categoryData.entries
@@ -570,28 +596,51 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   Widget _buildCategoryItem(String category, double amount, double total) {
-    final percentage = (amount / total * 100).round();
+    final percentage = total > 0 ? (amount / total * 100).round() : 0;
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
-      child: Column(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(category, style: TextStyle(fontWeight: FontWeight.w500)),
-              Text(
-                '₹${amount.toStringAsFixed(0)} ($percentage%)',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: AppTheme.getCategoryColor(category),
+              borderRadius: BorderRadius.circular(6),
+            ),
           ),
-          SizedBox(height: 4),
-          LinearProgressIndicator(
-            value: amount / total,
-            backgroundColor: Colors.grey[300],
-            valueColor: AlwaysStoppedAnimation<Color>(
-              _getCategoryColor(category),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      category,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: AppTheme.primaryWhite,
+                      ),
+                    ),
+                    Text(
+                      '₹${amount.toStringAsFixed(0)} ($percentage%)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.lightGrey,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4),
+                LinearProgressIndicator(
+                  value: amount / total,
+                  backgroundColor: AppTheme.darkGrey,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.getCategoryColor(category)),
+                ),
+              ],
             ),
           ),
         ],
@@ -602,14 +651,10 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget _buildInsights(StatsProvider provider) {
     final totalSpending = provider.getTotalSpending();
     final pending = provider.getPendingPayments();
-    final owed = provider.getOwedAmount();
-
-    if (totalSpending <= 0) return SizedBox.shrink();
-
-    final netBalance = owed - pending;
 
     return Card(
       elevation: 3,
+      color: AppTheme.cardBlack,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -618,29 +663,25 @@ class _StatsScreenState extends State<StatsScreen> {
           children: [
             Text(
               "Insights",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16, 
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryWhite,
+              ),
             ),
-            SizedBox(height: 8),
-            _buildInsightItem(
-              Icons.account_balance_wallet,
-              "Net Balance",
-              netBalance >= 0
-                  ? "You're owed ₹${netBalance.toStringAsFixed(0)}"
-                  : "You owe ₹${(-netBalance).toStringAsFixed(0)}",
-              netBalance >= 0 ? Colors.green : Colors.red,
-            ),
+            SizedBox(height: 12),
             _buildInsightItem(
               Icons.trending_up,
               "Monthly Spending",
               "₹${totalSpending.toStringAsFixed(0)} this month",
-              Colors.blue,
+              AppTheme.primaryWhite,
             ),
             if (pending > 0)
               _buildInsightItem(
                 Icons.schedule,
                 "Pending Payments",
                 "₹${pending.toStringAsFixed(0)} to settle",
-                Colors.orange,
+                AppTheme.warningOrange,
               ),
           ],
         ),
@@ -661,7 +702,7 @@ class _StatsScreenState extends State<StatsScreen> {
           Container(
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withOpacity(0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -671,10 +712,19 @@ class _StatsScreenState extends State<StatsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontWeight: FontWeight.w500)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.primaryWhite,
+                  ),
+                ),
                 Text(
                   subtitle,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.mediumGrey,
+                  ),
                 ),
               ],
             ),
@@ -684,41 +734,17 @@ class _StatsScreenState extends State<StatsScreen> {
     );
   }
 
-  // Helper methods
-  double _calculateInterval(List<Map<String, dynamic>> data) {
-    if (data.isEmpty) return 1000;
-
-    final maxAmount = data
+  double _calculateInterval(List<Map<String, dynamic>> graphData) {
+    if (graphData.isEmpty) return 1000;
+    
+    final maxAmount = graphData
         .map((e) => e['amount'] as double)
         .reduce((a, b) => a > b ? a : b);
-
-    if (maxAmount <= 1000) return 200;
-    if (maxAmount <= 5000) return 1000;
-    if (maxAmount <= 10000) return 2000;
+    
+    if (maxAmount < 1000) return 200;
+    if (maxAmount < 5000) return 1000;
+    if (maxAmount < 10000) return 2000;
     return 5000;
-  }
-
-  String _formatAmount(double amount) {
-    if (amount >= 100000) {
-      return '${(amount / 100000).toStringAsFixed(1)}L';
-    } else if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(1)}K';
-    }
-    return amount.toStringAsFixed(0);
-  }
-
-  Color _getCategoryColor(String category) {
-    final colors = [
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.red,
-      Colors.purple,
-      Colors.teal,
-      Colors.indigo,
-      Colors.amber,
-    ];
-    return colors[category.hashCode % colors.length];
   }
 
   Future<void> _selectMonth(
@@ -733,10 +759,13 @@ class _StatsScreenState extends State<StatsScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Colors.blue,
-              onPrimary: Colors.white,
+            colorScheme: ColorScheme.dark(
+              primary: AppTheme.primaryWhite,
+              onPrimary: AppTheme.primaryBlack,
+              surface: AppTheme.cardBlack,
+              onSurface: AppTheme.primaryWhite,
             ),
+            dialogBackgroundColor: AppTheme.cardBlack,
           ),
           child: child!,
         );
@@ -751,59 +780,51 @@ class _StatsScreenState extends State<StatsScreen> {
   void _showExportOptions(BuildContext context, StatsProvider provider) {
     showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) {
+      backgroundColor: AppTheme.cardBlack,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
         return Container(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'Export Options',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryWhite,
+                ),
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 20),
               ListTile(
-                leading: Icon(Icons.table_chart, color: Colors.green),
-                title: Text('Export as CSV'),
-                subtitle: Text('Download expense data as spreadsheet'),
+                leading: Icon(Icons.file_download, color: AppTheme.primaryWhite),
+                title: Text(
+                  'Export as PDF',
+                  style: TextStyle(color: AppTheme.primaryWhite),
+                ),
                 onTap: () {
                   Navigator.pop(context);
-                  _exportAsCSV(provider);
+                  // TODO: Implement PDF export
                 },
               ),
               ListTile(
-                leading: Icon(Icons.picture_as_pdf, color: Colors.red),
-                title: Text('Export as PDF'),
-                subtitle: Text('Generate detailed report'),
+                leading: Icon(Icons.table_chart, color: AppTheme.primaryWhite),
+                title: Text(
+                  'Export as CSV',
+                  style: TextStyle(color: AppTheme.primaryWhite),
+                ),
                 onTap: () {
                   Navigator.pop(context);
-                  _exportAsPDF(provider);
+                  // TODO: Implement CSV export
                 },
               ),
             ],
           ),
         );
       },
-    );
-  }
-
-  void _exportAsCSV(StatsProvider provider) {
-    // TODO: Implement CSV export functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('CSV export functionality coming soon!'),
-        backgroundColor: Colors.orange,
-      ),
-    );
-  }
-
-  void _exportAsPDF(StatsProvider provider) {
-    // TODO: Implement PDF export functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('PDF export functionality coming soon!'),
-        backgroundColor: Colors.orange,
-      ),
     );
   }
 }
