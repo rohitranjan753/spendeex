@@ -35,7 +35,7 @@ class BottomNavBar extends StatelessWidget {
             tabs: [
               GButton(icon: Icons.home, text: "Home"),
               GButton(icon: Icons.people, text: "Group"),
-              GButton(icon: Icons.graphic_eq, text: "Stats"),
+              GButton(icon: Icons.emoji_people, text: "FriendS"),
               GButton(icon: Icons.person, text: "Profile"),
             ],
           ),

@@ -7,17 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:606315075024:android:9884efbc177a8ccf1f95d5",
+        "mobilesdk_app_id": "1:606315075024:android:c07f5e96d0639dd31f95d5",
         "android_client_info": {
-          "package_name": "com.example.spendeex"
+          "package_name": "com.techhive.spendeex"
         }
       },
       "oauth_client": [
         {
-          "client_id": "606315075024-7ovj508lvd7e1ql3mhvsuocoikn96jc3.apps.googleusercontent.com",
+          "client_id": "606315075024-rfrdmtuaadokbd0kse9183sn4nvq0gps.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.spendeex",
+            "package_name": "com.techhive.spendeex",
             "certificate_hash": "ab1b5aea8425f46ae4ed40881145eca5df9698ae"
           }
         },

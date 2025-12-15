@@ -148,7 +148,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 SizedBox(height: 12),
-                _buildMembershipBadge(),
               ],
             ),
           ),
@@ -189,32 +188,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             provider.userProfilePic == null
                 ? Icon(Icons.person, size: 50, color: AppTheme.primaryWhite)
                 : null,
-      ),
-    );
-  }
-
-  Widget _buildMembershipBadge() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryWhite.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.primaryWhite.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.star, color: AppTheme.primaryWhite, size: 18),
-          SizedBox(width: 6),
-          Text(
-            "Premium Member",
-            style: TextStyle(
-              color: AppTheme.primaryWhite,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
       ),
     );
   }
