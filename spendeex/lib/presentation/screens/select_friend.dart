@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spendeex/core/auth_utils.dart';
 import 'package:spendeex/data/repositories/group_repository.dart';
+import 'package:spendeex/presentation/widgets/shimmer_widgets.dart';
+import 'package:spendeex/data/repositories/user_repository.dart';
 
 class SelectFriendsWidget extends StatefulWidget {
   final List<Friend>? initialFriends;
@@ -354,21 +356,14 @@ class SelectFriendsWidgetState extends State<SelectFriendsWidget> {
                 Expanded(
                   child:
                       _isLoadingFriends
-                          ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CircularProgressIndicator(),
-                                SizedBox(height: 16),
-                                Text(
-                                  'Loading friends from your groups...',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                            ),
+                          ? ListView.separated(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: 6, // Show 6 shimmer placeholders
+                            separatorBuilder:
+                                (context, index) => SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              return ShimmerWidgets.listItemShimmer(height: 70);
+                            },
                           )
                           : filteredFriends.isEmpty
                           ? Center(

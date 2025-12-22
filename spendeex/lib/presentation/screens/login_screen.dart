@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spendeex/config/theme.dart';
+import 'package:spendeex/presentation/widgets/shimmer_widgets.dart';
 import '../../providers/auth_provider.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -56,20 +57,26 @@ class LoginScreen extends StatelessWidget {
               SizedBox(height: 80),
               
               // Login Button
-              if (authProvider.isLoading)
-                Container(
-                  height: 56,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppTheme.primaryWhite,
-                    ),
-                  ),
-                )
-              else
-                ElevatedButton.icon(
-                  onPressed: () => authProvider.signInWithGoogle(),
-                  icon: Icon(Icons.login, color: AppTheme.primaryBlack),
-                  label: Text(
+              
+              ElevatedButton.icon(
+                onPressed: () => authProvider.signInWithGoogle(),
+                icon:
+                    authProvider.isLoading
+                        ? null
+                        : Icon(Icons.login, color: AppTheme.primaryBlack),
+                label:
+                    authProvider.isLoading
+                        ? Center(
+                          child: SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: AppTheme.cardBlack,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        )
+                        : Text(
                     'Sign in with Google',
                     style: TextStyle(
                       fontSize: 16,

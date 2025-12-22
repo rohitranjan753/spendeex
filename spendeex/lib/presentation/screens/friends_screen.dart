@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:spendeex/providers/friends_provider.dart';
 import 'package:spendeex/config/theme.dart';
+import 'package:spendeex/presentation/widgets/shimmer_widgets.dart';
+import 'package:spendeex/providers/friends_provider.dart';
+
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -46,10 +48,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
       body: Consumer<FriendsProvider>(
         builder: (context, friendsProvider, child) {
           if (friendsProvider.isLoading) {
-            return Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.successGreen),
-              ),
+            return ListView.separated(
+              padding: EdgeInsets.all(16),
+              itemCount: 6, // Show 6 shimmer placeholders
+              separatorBuilder: (context, index) => SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                return ShimmerWidgets.listItemShimmer(height: 80);
+              },
             );
           }
 

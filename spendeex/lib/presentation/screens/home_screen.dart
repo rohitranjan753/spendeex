@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:spendeex/config/theme.dart';
 import 'package:spendeex/core/routes/app_routes.dart';
 import 'package:spendeex/providers/home_provider.dart';
+import 'package:spendeex/presentation/widgets/shimmer_widgets.dart';
 import '../../providers/auth_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -127,15 +128,68 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildLoadingScreen() {
-    return Center(
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircularProgressIndicator(color: AppTheme.primaryWhite),
-          SizedBox(height: 16),
-          Text(
-            'Loading your dashboard...',
-            style: TextStyle(color: AppTheme.mediumGrey, fontSize: 16),
+          // Balance card shimmer
+          ShimmerWidgets.cardShimmer(height: 180),
+          SizedBox(height: 20),
+
+          // Quick actions shimmer
+          ShimmerWidgets.textShimmer(width: 150, height: 20),
+          SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: ShimmerWidgets.cardShimmer(height: 100)),
+              SizedBox(width: 12),
+              Expanded(child: ShimmerWidgets.cardShimmer(height: 100)),
+              SizedBox(width: 12),
+              Expanded(child: ShimmerWidgets.cardShimmer(height: 100)),
+            ],
+          ),
+
+          SizedBox(height: 20),
+
+          // Monthly spending overview shimmer
+          ShimmerWidgets.cardShimmer(height: 220),
+
+          SizedBox(height: 20),
+
+          // Insights shimmer
+          ShimmerWidgets.cardShimmer(height: 160),
+
+          SizedBox(height: 20),
+
+          // Activity logs shimmer
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppTheme.cardBlack,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppTheme.darkGrey),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ShimmerWidgets.textShimmer(width: 120, height: 18),
+                    ShimmerWidgets.textShimmer(width: 60, height: 16),
+                  ],
+                ),
+                SizedBox(height: 16),
+                ...List.generate(
+                  3,
+                  (index) => Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: ShimmerWidgets.listItemShimmer(height: 60),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

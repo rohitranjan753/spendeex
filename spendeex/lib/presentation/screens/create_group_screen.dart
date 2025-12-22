@@ -6,6 +6,7 @@ import 'package:spendeex/presentation/screens/select_friend.dart';
 import 'package:spendeex/data/repositories/user_repository.dart';
 import 'package:spendeex/core/auth_utils.dart';
 import 'package:spendeex/providers/create_group_provider.dart';
+import 'package:spendeex/presentation/widgets/shimmer_widgets.dart';
 
 class CreateGroupScreen extends StatefulWidget {
   @override
@@ -246,16 +247,13 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                         },
                                 child:
                                     isLoading
-                                        ? SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                  Colors.white,
-                                                ),
+                                        ? ShimmerWidgets.circularShimmer(
+                                          size: 20,
+                                          baseColor: Colors.white.withOpacity(
+                                            0.3,
                                           ),
+                                          highlightColor: Colors.white
+                                              .withOpacity(0.1),
                                         )
                                         : Text('Add User'),
                                 style: ElevatedButton.styleFrom(

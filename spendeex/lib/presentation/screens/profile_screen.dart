@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spendeex/config/theme.dart';
+import 'package:spendeex/presentation/widgets/shimmer_widgets.dart';
 import 'package:spendeex/providers/profile_provider.dart';
 import 'package:spendeex/data/repositories/auth_repository.dart';
 
@@ -25,18 +26,143 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (profileProvider.isLoading) {
           return Scaffold(
             backgroundColor: AppTheme.primaryBlack,
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: AppTheme.primaryWhite),
-                  SizedBox(height: 16),
-                  Text(
-                    'Loading your profile...',
-                    style: TextStyle(fontSize: 16, color: AppTheme.mediumGrey),
+            body: CustomScrollView(
+              slivers: [
+                // Shimmer AppBar
+                SliverAppBar(
+                  expandedHeight: 280,
+                  floating: false,
+                  pinned: true,
+                  elevation: 0,
+                  backgroundColor: AppTheme.primaryBlack,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppTheme.surfaceBlack, AppTheme.cardBlack],
+                        ),
+                      ),
+                      child: SafeArea(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(height: 40),
+                            // Profile avatar shimmer
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: AppTheme.primaryWhite, width: 4),
+                              ),
+                              child: ShimmerWidgets.circularShimmer(size: 100),
+                            ),
+                            SizedBox(height: 16),
+                            // Name shimmer
+                            ShimmerWidgets.textShimmer(width: 150, height: 28),
+                            SizedBox(height: 8),
+                            // Email shimmer
+                            ShimmerWidgets.textShimmer(width: 200, height: 16),
+                            SizedBox(height: 12),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ],
-              ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Stats cards shimmer
+                        Row(
+                          children: [
+                            Expanded(child: ShimmerWidgets.cardShimmer(height: 120)),
+                            SizedBox(width: 16),
+                            Expanded(child: ShimmerWidgets.cardShimmer(height: 120)),
+                          ],
+                        ),
+                        SizedBox(height: 24),
+                        // Quick actions shimmer
+                        ShimmerWidgets.textShimmer(width: 120, height: 20),
+                        SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(child: ShimmerWidgets.cardShimmer(height: 80)),
+                            SizedBox(width: 12),
+                            Expanded(child: ShimmerWidgets.cardShimmer(height: 80)),
+                          ],
+                        ),
+                        SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(child: ShimmerWidgets.cardShimmer(height: 80)),
+                            SizedBox(width: 12),
+                            Expanded(child: ShimmerWidgets.cardShimmer(height: 80)),
+                          ],
+                        ),
+                        SizedBox(height: 24),
+                        // Recent activity shimmer
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ShimmerWidgets.textShimmer(width: 130, height: 20),
+                            ShimmerWidgets.textShimmer(width: 70, height: 16),
+                          ],
+                        ),
+                        SizedBox(height: 16),
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceBlack,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppTheme.darkGrey),
+                          ),
+                          child: Column(
+                            children: List.generate(3, (index) => 
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: 8),
+                                child: ShimmerWidgets.listItemShimmer(height: 60),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 24),
+                        // Past expenses shimmer
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ShimmerWidgets.textShimmer(width: 120, height: 20),
+                            ShimmerWidgets.textShimmer(width: 70, height: 16),
+                          ],
+                        ),
+                        SizedBox(height: 16),
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceBlack,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppTheme.darkGrey),
+                          ),
+                          child: Column(
+                            children: List.generate(
+                              4,
+                              (index) => Padding(
+                                padding: EdgeInsets.symmetric(vertical: 8),
+                                child: ShimmerWidgets.listItemShimmer(
+                                  height: 60,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         }

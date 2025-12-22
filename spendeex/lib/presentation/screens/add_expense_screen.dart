@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spendeex/config/theme.dart';
+import 'package:spendeex/presentation/widgets/shimmer_widgets.dart';
 import 'package:spendeex/data/models/expense_model.dart';
 import 'package:spendeex/data/models/group_model.dart';
 import 'package:spendeex/presentation/screens/category_chip.dart';
@@ -59,7 +61,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ),
               child:
                   provider.isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
+                      ? ShimmerWidgets.circularShimmer(size: 20)
                       : Text("Save Expense", style: TextStyle(fontSize: 16)),
             ),
           ),

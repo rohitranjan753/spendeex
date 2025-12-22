@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:spendeex/config/theme.dart';
+import 'package:spendeex/presentation/widgets/shimmer_widgets.dart';
 import 'package:spendeex/providers/stats_provider.dart';
 
 class StatsScreen extends StatefulWidget {
@@ -42,16 +43,28 @@ class _StatsScreenState extends State<StatsScreen> {
           ),
           body:
               provider.isLoading
-                  ? Center(
+                  ? SingleChildScrollView(
+                    padding: EdgeInsets.all(16),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CircularProgressIndicator(color: AppTheme.primaryWhite),
+                        // Month selector shimmer
+                        ShimmerWidgets.cardShimmer(height: 100),
                         SizedBox(height: 16),
-                        Text(
-                          "Loading statistics...",
-                          style: TextStyle(color: AppTheme.mediumGrey),
-                        ),
+                        // Monthly breakdown shimmer
+                        ShimmerWidgets.statsShimmer(),
+                        SizedBox(height: 16),
+                        // Spending graph shimmer
+                        ShimmerWidgets.cardShimmer(height: 300),
+                        SizedBox(height: 16),
+                        // Category filter shimmer
+                        ShimmerWidgets.cardShimmer(height: 120),
+                        SizedBox(height: 16),
+                        // Category breakdown shimmer
+                        ShimmerWidgets.cardShimmer(height: 200),
+                        SizedBox(height: 16),
+                        // Insights shimmer
+                        ShimmerWidgets.cardShimmer(height: 150),
                       ],
                     ),
                   )

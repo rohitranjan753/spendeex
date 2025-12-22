@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spendeex/config/theme.dart';
 import 'package:spendeex/presentation/screens/add_expense_screen.dart';
+import 'package:spendeex/presentation/widgets/shimmer_widgets.dart';
 import 'package:spendeex/providers/group_details_provider.dart';
 import 'package:intl/intl.dart';
 
@@ -66,19 +67,50 @@ class _GroupDetailsState extends State<GroupDetails> with SingleTickerProviderSt
               ],
             ),
           ),
-          body: provider.isLoading
-                  ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+          body:
+              provider.isLoading
+                  ? Column(
                       children: [
-                        CircularProgressIndicator(color: AppTheme.primaryWhite),
-                        SizedBox(height: 16),
-                        Text(
-                          "Loading group details...",
-                          style: TextStyle(color: AppTheme.mediumGrey),
+                      // Group summary shimmer
+                      Container(
+                        margin: EdgeInsets.all(16),
+                        child: ShimmerWidgets.groupDetailsShimmer(),
+                      ),
+                      // Member filter shimmer
+                      Container(
+                        height: 60,
+                        margin: EdgeInsets.symmetric(horizontal: 16),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: 5,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: EdgeInsets.only(right: 8),
+                              child: ShimmerWidgets.textShimmer(
+                                width: 80,
+                                height: 32,
+                              ),
+                            );
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                        SizedBox(height: 16),
+                      // Content shimmer
+                      Expanded(
+                        child: ListView.builder(
+                          padding: EdgeInsets.all(16),
+                          itemCount: 8,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: EdgeInsets.only(bottom: 12),
+                              child: ShimmerWidgets.listItemShimmer(
+                                height: 100,
+                              ),
+                            );
+                          },
+                        ),
+                        ),
+                    ],
                   )
               : provider.error != null
                   ? _buildErrorWidget(provider)

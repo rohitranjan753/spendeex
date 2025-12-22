@@ -4,6 +4,7 @@ import 'package:spendeex/config/theme.dart';
 import 'package:spendeex/core/routes/app_routes.dart';
 import 'package:spendeex/presentation/screens/create_group_screen.dart';
 import 'package:spendeex/presentation/screens/group_details.dart';
+import 'package:spendeex/presentation/widgets/shimmer_widgets.dart';
 import 'package:spendeex/providers/group_provider.dart';
 import 'package:spendeex/data/models/group_model.dart';
 
@@ -48,18 +49,15 @@ class _GroupScreenState extends State<GroupScreen> {
       body: Consumer<GroupProvider>(
         builder: (context, groupProvider, child) {
           if (groupProvider.isLoading) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: AppTheme.primaryWhite),
-                  SizedBox(height: 16),
-                  Text(
-                    "Loading your groups...",
-                    style: TextStyle(color: AppTheme.mediumGrey),
-                  ),
-                ],
-              ),
+            return ListView.builder(
+              padding: EdgeInsets.all(16),
+              itemCount: 6, // Show 6 shimmer placeholders
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: EdgeInsets.only(bottom: 12),
+                  child: ShimmerWidgets.listItemShimmer(height: 100),
+                );
+              },
             );
           }
 
